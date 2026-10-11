@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BOTNAME</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#050505;--royal:#1c1c20;--blue:#48484f;--vio:#3a3a40;--lav:#9a9aa2;--ice:#e4e4e8;--text:#F5F5F7;--muted:#a8a8b0;--line:rgba(255,255,255,.2);--glass:rgba(22,22,24,.5);--win:rgba(16,16,18,.8);color-scheme:dark;box-sizing:border-box}
+:root[data-theme="light"]{--text:#F2F5FF}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--text:#F2F5FF}}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:Inter,-apple-system,"SF Pro Text",system-ui,sans-serif;color:var(--text);background:var(--navy);font-size:14px;user-select:none;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--ice);outline-offset:2px}
+svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* Wallpaper */
+.wall{position:fixed;inset:0;z-index:0;overflow:hidden;background:
+ radial-gradient(80% 55% at 25% 0%,rgba(75,39,255,.85),transparent 62%),
+ radial-gradient(70% 60% at 100% 100%,rgba(23,77,255,.65),transparent 62%),
+ linear-gradient(165deg,#3a1fd0 0%,#1b1b9e 28%,#05082F 55%,#0b2bbd 100%);transition:filter .6s}
+[data-wp="graphite"] .wall{filter:grayscale(1) contrast(1.15)}
+[data-wp="silver"] .wall{filter:grayscale(1) brightness(1.5) contrast(.95)}
+[data-wp="ink"] .wall{filter:grayscale(1) brightness(.55)}
+.wall svg{position:absolute;inset:0;width:100%;height:100%}
+.wall .gl{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;animation:dr 24s ease-in-out infinite alternate}
+@keyframes dr{to{transform:translate(3%,-3%) scale(1.06)}}
+
+/* Menu bar */
+.mb{position:fixed;top:0;left:0;right:0;height:30px;z-index:9000;display:flex;align-items:center;justify-content:space-between;padding:0 12px;padding-top:env(safe-area-inset-top,0px);height:calc(30px + env(safe-area-inset-top,0px));background:rgba(10,10,12,.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(160,180,255,.12);font-size:13px;font-weight:500}
+.mb>div{display:flex;align-items:center;gap:2px}
+.mi{background:none;border:0;padding:3px 10px;border-radius:6px;font-weight:500}
+.mi:hover,.mi.on{background:rgba(255,255,255,.16)}.mi.app{font-weight:700}
+.sys{display:flex;gap:12px;align-items:center;padding-right:4px}
+.sys button{background:none;border:0;display:flex;padding:2px}
+.dd{position:fixed;z-index:9500;min-width:210px;padding:6px;border-radius:12px;background:rgba(18,18,20,.85);backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%);border:1px solid var(--line);box-shadow:0 20px 50px rgba(2,4,40,.7);display:none}
+.dd.show{display:block;animation:pop .14s}
+.dd button{display:flex;justify-content:space-between;gap:20px;width:100%;text-align:left;background:none;border:0;padding:6px 10px;border-radius:7px}
+.dd button:hover,.dd button:focus-visible{background:var(--blue)}
+.dd hr{border:0;border-top:1px solid var(--line);margin:5px 4px}.dd .k{opacity:.55}
+@keyframes pop{from{opacity:0;transform:scale(.97)}}
+
+/* Windows */
+.win{position:fixed;z-index:10;display:flex;flex-direction:column;border-radius:14px;background:var(--win);backdrop-filter:blur(26px) saturate(140%);-webkit-backdrop-filter:blur(26px) saturate(140%);border:1px solid var(--line);box-shadow:0 30px 70px -10px rgba(1,3,35,.8),inset 0 1px 0 rgba(255,255,255,.15);overflow:hidden;animation:open .22s cubic-bezier(.2,.9,.3,1);transition:opacity .2s,transform .22s,left .2s,top .2s,width .2s,height .2s}
+@keyframes open{from{opacity:0;transform:scale(.92)}}
+.win.closing{opacity:0;transform:scale(.94);pointer-events:none}
+.win.min{opacity:0;transform:translateY(60vh) scale(.3);pointer-events:none;visibility:hidden}
+.win.max{left:10px!important;top:38px!important;width:calc(100vw - 20px)!important;height:calc(100vh - 128px)!important}
+.win.drag{transition:opacity .2s,transform .2s}
+.win:not(.act){box-shadow:0 14px 40px -10px rgba(1,3,35,.7)}.win:not(.act) .tb{opacity:.7}
+.tb{display:flex;align-items:center;gap:8px;height:42px;padding:0 14px;background:rgba(255,255,255,.06);border-bottom:1px solid var(--line);cursor:grab;touch-action:none;flex:none}
+.tb h2{flex:1;text-align:center;font-size:13px;font-weight:600;margin-right:50px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dots{display:flex;gap:8px;z-index:1}
+.dots button{width:13px;height:13px;border-radius:50%;border:0;padding:0;position:relative}
+.dots .r{background:#ff5f57}.dots .y{background:#febc2e}.dots .g{background:#28c840}
+.dots:hover button::after{content:"";position:absolute;inset:4px;border-radius:50%;background:rgba(0,0,0,.45)}
+.bd{flex:1;overflow:auto;padding:22px;user-select:text;font-size:14px;line-height:1.6}
+.bd h1{font-size:1.5rem;letter-spacing:-.02em;margin-bottom:6px}.bd h3{margin:18px 0 6px;font-size:1rem}
+.bd p,.bd li{color:#d6dcff}.bd ul{padding-left:20px}.mut{color:var(--muted)!important}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.1);font-weight:600;transition:.2s}
+.btn:hover{background:rgba(255,255,255,.18)}
+.btn.p{background:#f5f5f7;color:#0a0a0c;border-color:#fff;box-shadow:0 8px 24px -8px rgba(255,255,255,.5)}.btn.p:hover{background:#fff}
+.btn.big{padding:14px 28px;font-size:1rem}
+.logo{width:76px;height:76px;border-radius:20px;display:grid;place-items:center;background:linear-gradient(135deg,var(--ice),var(--vio));box-shadow:0 12px 30px -8px var(--vio)}
+.logo svg{width:40px;height:40px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center}
+.tag{font-size:.7rem;padding:2px 8px;border-radius:99px;background:rgba(255,255,255,.12);color:var(--ice)}
+.note{margin-top:14px;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.2);color:#d8d8dc;font-size:.85rem}
+.item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.item .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),var(--lav))}
+.item b{display:block}
+.split{display:grid;grid-template-columns:170px 1fr;height:100%}
+.side{padding:12px 8px;border-right:1px solid var(--line);background:rgba(3,5,40,.3);overflow:auto}
+.side button{display:block;width:100%;text-align:left;background:none;border:0;padding:7px 10px;border-radius:8px;color:var(--muted)}
+.side button:hover{color:#fff}.side button.on{background:rgba(120,101,255,.35);color:#fff}
+.main{padding:22px;overflow:auto;user-select:text}
+.inp{width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(3,5,40,.5);color:#fff;font:inherit;outline:none}
+.inp:focus{border-color:var(--ice)}
+.cmd{padding:12px 14px;margin-top:10px;border-radius:12px;background:rgba(3,5,40,.45);border:1px solid var(--line)}
+.cmd code{font-family:ui-monospace,Menlo,monospace;color:var(--ice);font-weight:600;cursor:pointer}
+.cmd small{display:block;color:var(--muted)}.cmd kbd{font-family:ui-monospace,Menlo,monospace;font-size:.8rem;opacity:.8}
+.pills{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}.pills button{padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:none;color:var(--muted)}
+.pills button.on{background:var(--vio);color:#fff;border-color:transparent}
+.sw{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.tg{width:44px;height:26px;border-radius:99px;border:0;background:rgba(255,255,255,.2);position:relative;transition:.2s}
+.tg::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
+.tg[aria-checked="true"]{background:#8a8a92}.tg[aria-checked="true"]::after{transform:translateX(18px)}
+
+/* Dock */
+.dockw{position:fixed;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:8000;display:flex;justify-content:center;padding:0 8px;pointer-events:none}
+.dock{pointer-events:auto;display:flex;align-items:flex-end;gap:8px;padding:8px 12px;border-radius:26px;background:var(--glass);backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);border:1px solid var(--line);box-shadow:0 20px 50px -10px rgba(1,3,35,.8),inset 0 1px 0 rgba(255,255,255,.2);max-width:100%}
+.dk{position:relative;width:52px;height:52px;border-radius:14px;border:0;padding:0;display:grid;place-items:center;transition:transform .18s cubic-bezier(.3,1.4,.5,1);flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 6px 14px -4px rgba(1,3,35,.7)}
+.dk svg{width:28px;height:28px;stroke-width:1.8;color:#fff}
+.dk:hover,.dk:focus-visible{transform:translateY(-10px) scale(1.22)}
+.dk::before{content:attr(data-tip);position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%);white-space:nowrap;padding:4px 10px;border-radius:8px;background:rgba(14,14,16,.92);border:1px solid var(--line);font-size:12px;opacity:0;pointer-events:none;transition:.15s}
+.dk:hover::before,.dk:focus-visible::before{opacity:1}
+.dk::after{content:"";position:absolute;bottom:-7px;width:4px;height:4px;border-radius:50%;background:#fff;opacity:0}
+.dk.open::after{opacity:.9}.dk.minz::after{opacity:.4}
+.dk{background:linear-gradient(145deg,#5a5a62,#17171a)!important}.sep{width:1px;height:44px;background:var(--line);align-self:center;flex:none}
+@media(max-width:720px){.dock{overflow-x:auto;gap:6px;scrollbar-width:none}.dk{width:44px;height:44px}.dk:hover{transform:none}.dk::before{display:none}
+.win,.win.max{left:8px!important;top:36px!important;width:calc(100vw - 16px)!important;height:calc(100vh - 118px)!important}
+.mb .mi:not(.app){display:none}.split{grid-template-columns:1fr;grid-template-rows:auto 1fr}.side{display:flex;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line)}.side button{width:auto;white-space:nowrap}}
+
+/* Spotlight / context */
+.spot{position:fixed;inset:0;z-index:9800;display:none;align-items:flex-start;justify-content:center;padding-top:16vh;background:rgba(2,3,30,.3)}
+.spot.show{display:flex}
+.sp{width:min(560px,92vw);border-radius:18px;background:rgba(18,18,20,.88);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border:1px solid var(--line);box-shadow:0 30px 80px rgba(1,3,35,.8);padding:10px;animation:pop .15s}
+.sp input{width:100%;background:none;border:0;outline:0;color:#fff;font:inherit;font-size:18px;padding:10px 12px}
+.sp button{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:10px}
+.sp button:hover,.sp button.on{background:var(--blue)}
+.ghost{font-size:11px;opacity:.5;position:fixed;bottom:84px;left:0;right:0;text-align:center;z-index:1;pointer-events:none}
+html.rm *{animation:none!important;transition:none!important}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="bot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 14h.01M15 14h.01"/></symbol>
+<symbol id="home" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8.5 15c1 1.5 6 1.5 7 0"/></symbol>
+<symbol id="grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></symbol>
+<symbol id="term" viewBox="0 0 24 24"><path d="M4 17l6-5-6-5M12 19h8"/></symbol>
+<symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="life" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M5.6 5.6l3.9 3.9M14.5 14.5l3.9 3.9M18.4 5.6l-3.9 3.9M9.5 14.5l-3.9 3.9"/></symbol>
+<symbol id="book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h13v17H6a2 2 0 00-2 2zM4 19a2 2 0 012-2h13"/></symbol>
+<symbol id="file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8zM14 3v5h5M9 13h6M9 17h6"/></symbol>
+<symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></symbol>
+<symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
+<symbol id="wifi" viewBox="0 0 24 24"><path d="M2 9a15 15 0 0120 0M5.5 12.5a10 10 0 0113 0M9 16a5 5 0 016 0M12 19.5h.01"/></symbol>
+<symbol id="batt" viewBox="0 0 24 24"><rect x="2" y="7" width="17" height="10" rx="3"/><path d="M22 11v2M6 10v4M9 10v4M12 10v4"/></symbol>
+<symbol id="ctl" viewBox="0 0 24 24"><path d="M4 8h10M18 8h2M4 16h2M10 16h10"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/></symbol>
+<symbol id="zap" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+<symbol id="shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></symbol>
+<symbol id="chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></symbol>
+<symbol id="pal" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 10h.01M12 7h.01M16 10h.01M12 15a2 2 0 100 4c3 0 6-1 6-4"/></symbol>
+</defs></svg>
+
+<div class="wall" aria-hidden="true">
+<svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice"><defs>
+<linearGradient id="s1" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#9CBFFF" stop-opacity="0"/><stop offset=".55" stop-color="#9CBFFF"/><stop offset="1" stop-color="#7865FF" stop-opacity=".3"/></linearGradient>
+<linearGradient id="s2" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#05082F"/><stop offset=".6" stop-color="#0a1d9a"/><stop offset="1" stop-color="#4B27FF"/></linearGradient>
+<linearGradient id="s3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#174DFF"/><stop offset="1" stop-color="#05082F"/></linearGradient>
+<filter id="b1"><feGaussianBlur stdDeviation="22"/></filter><filter id="b2"><feGaussianBlur stdDeviation="50"/></filter></defs>
+<path d="M-100 760C260 700 520 430 820 300S1280 60 1560-40V1000H-100Z" fill="url(#s2)" opacity=".9"/>
+<path d="M-100 880C300 820 600 560 900 440S1300 260 1560 190V1000H-100Z" fill="url(#s3)" opacity=".8" filter="url(#b1)"/>
+<path d="M900 1000C1000 800 1200 640 1560 540V1000Z" fill="#9CBFFF" opacity=".35" filter="url(#b2)"/>
+<path d="M-100 735C260 685 520 415 820 285S1280 45 1560-55" fill="none" stroke="url(#s1)" stroke-width="3"/>
+<path d="M-100 770C260 725 540 450 840 325S1290 80 1560-20" fill="none" stroke="url(#s1)" stroke-width="1.5" opacity=".5"/>
+</svg>
+<div class="gl" style="width:520px;height:520px;background:#4B27FF;top:-160px;left:10%"></div>
+<div class="gl" style="width:600px;height:600px;background:#174DFF;bottom:-260px;left:25%;animation-delay:-9s"></div>
+</div>
+
+<div class="mb" role="menubar">
+<div id="menus"></div>
+<div class="sys">
+<button aria-label="Activity" tabindex="-1"><svg class="i"><use href="#wifi"/></svg></button>
+<button aria-label="Battery" tabindex="-1"><svg class="i" style="width:20px"><use href="#batt"/></svg></button>
+<button aria-label="Search (Ctrl/Cmd+K)" id="mbSearch"><svg class="i"><use href="#search"/></svg></button>
+<button aria-label="Control Center" tabindex="-1"><svg class="i"><use href="#ctl"/></svg></button>
+<span id="clock"></span>
+</div></div>
+<div class="dd" id="dd" role="menu"></div>
+<div class="dd" id="ctx" role="menu"></div>
+<div class="ghost">Right-click the desktop · Ctrl/Cmd+K to search</div>
+<div class="dockw"><nav class="dock" id="dock" aria-label="Dock"></nav></div>
+<div class="spot" id="spot"><div class="sp"><input id="spIn" placeholder="Spotlight Search" aria-label="Spotlight search"><div id="spRes"></div></div></div>
+
+<script>
+/* ===== Configure here ===== */
+const CFG={name:"Havoc",invite:"",support:"",docsUrl:"",apiUrl:"https://api.havoc.website",commandsUrl:"./commands.json",version:"v0.0.0 (placeholder)",updated:"[DATE — to be supplied]"};
+const FEATURES=[["shield","Moderation","Placeholder — describe your moderation tools."],["term","Custom commands","Placeholder — describe custom command support."],["zap","Automation","Placeholder — describe automation and utilities."],["chart","Analytics","Placeholder — describe server insights."],["pal","Customization","Placeholder — describe configuration options."]];
+let COMMANDS=[["/help","General","Show available commands.","/help","None"],["/ping","General","Check bot latency.","/ping","None"],["/ban","Moderation","Ban a member.","/ban @user reason","Ban Members"],["/kick","Moderation","Remove a member.","/kick @user reason","Kick Members"],["/config","Admin","Open server configuration.","/config view","Manage Server"],["/remind","Utility","Set a reminder.","/remind 10m stretch","None"]];
+const DOCS=[["Installation","Placeholder: how to invite the bot and which permissions it needs."],["Setup","Placeholder: first-time configuration steps."],["Commands","Placeholder: reference for each command."],["Configuration","Placeholder: server settings and options."],["Troubleshooting","Placeholder: common problems and fixes."]];
+const TOS=[["Acceptance of Terms","[Placeholder] Describe how users agree to these terms."],["Use of the Service","[Placeholder] Describe permitted and prohibited use."],["Data and Content","[Placeholder] Describe ownership and responsibilities."],["Termination","[Placeholder] Describe how access may be restricted."],["Changes and Contact","[Placeholder] Describe how terms change and how to reach you."]];
+const PRIV=[["Information Collected","[Requires configuration] State exactly what data the bot collects."],["How Information Is Used","[Requires configuration] State the purposes."],["Data Retention","[Requires configuration] State how long data is kept."],["Third-Party Services","[Requires configuration] List any services used."],["Data Deletion Requests","[Requires configuration] Explain how users can request deletion."],["Contact","[Requires configuration] Provide a contact method."]];
+/* ========================== */
+const $=(s,r=document)=>r.querySelector(s),ic=(n,c="")=>`<svg class="i ${c}"><use href="#${n}"/></svg>`;
+const N=CFG.name;document.title=N;
+const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+const ph=u=>u?"":`<div class="note">Placeholder: set <code>CFG.${u===0?"":""}</code>in the config block.</div>`;
+const legal=(t,s)=>`<div class="split"><div class="side">${s.map((x,i)=>`<button data-j="${i}">${x[0]}</button>`).join("")}</div><div class="main"><h1>${t}</h1><p class="mut">Last updated: ${CFG.updated}</p><div class="note">Placeholder text — not legally reviewed or complete.</div>${s.map((x,i)=>`<h3 id="s${i}">${i+1}. ${x[0]}</h3><p>${x[1]}</p>`).join("")}</div></div>`;
+const legalInit=b=>b.querySelectorAll("[data-j]").forEach(x=>x.onclick=()=>b.querySelector("#s"+x.dataset.j).scrollIntoView({behavior:"smooth",block:"start"}));
+const link=(u,l,p)=>u?`<a class="btn ${p?"p":""}" href="${u}" target="_blank" rel="noopener">${l}</a>`:`<button class="btn ${p?"p":""}" disabled title="URL not configured" style="opacity:.55;cursor:not-allowed">${l}</button>`;
+
+const APPS={
+about:{t:"About "+N,i:"home",g:"#3aa0ff,#174DFF",w:520,h:420,dock:1,body:()=>`<div class="bd"><div class="row" style="margin:0 0 14px;gap:18px"><div class="logo">${ic("bot")}</div><div><h1>${N}</h1><span class="tag">${CFG.version}</span></div></div><p>Placeholder: a short introduction to your bot and what it helps server owners do.</p><h3>Purpose</h3><p class="mut">Placeholder: describe the main purpose of the bot.</p><div class="row">${link(CFG.invite,"Add to Discord",1)}${link(CFG.support,"Support server")}</div>${CFG.invite?"":'<div class="note">Invite and support URLs are not configured yet (see <code>CFG</code>).</div>'}</div>`},
+features:{t:"Features",i:"grid",g:"#7865FF,#4B27FF",w:520,h:440,dock:1,body:()=>`<div class="bd"><h1>Features</h1><p class="mut">Editable placeholders — not confirmed capabilities.</p>${FEATURES.map(f=>`<div class="item"><div class="ic">${ic(f[0])}</div><div><b>${f[1]}</b><span class="mut">${f[2]}</span></div></div>`).join("")}</div>`},
+commands:{t:"Commands",i:"term",g:"#2b2f5e,#05082F",w:600,h:480,dock:1,body:()=>`<div class="bd"><input class="inp" id="cq" placeholder="Search commands…" aria-label="Search commands"><div class="pills" id="cp"></div><div id="cl"></div><p class="mut" style="margin-top:12px;font-size:.8rem">Slash commands shown. Every command also works with your server's text prefix (default $). Click a command to copy it.</p></div>`,init(b){let cat="All";const cats=["All",...new Set(COMMANDS.map(c=>c[1]))];const r=()=>{const q=$("#cq",b).value.toLowerCase();$("#cp",b).innerHTML=cats.map(c=>`<button class="${c===cat?"on":""}" aria-pressed="${c===cat}">${c}</button>`).join("");$("#cp",b).querySelectorAll("button").forEach(x=>x.onclick=()=>{cat=x.textContent;r()});const l=COMMANDS.filter(c=>(cat==="All"||c[1]===cat)&&c.join(" ").toLowerCase().includes(q));$("#cl",b).innerHTML=l.length?l.map(c=>`<div class="cmd"><code data-c="${c[0]}" tabindex="0" role="button">${c[0]}</code> <span class="tag">${c[1]}</span><small>${c[2]}</small><kbd>Example: ${c[3]} · Permission: ${c[4]}</kbd></div>`).join(""):'<p class="mut" style="margin-top:14px">No matches.</p>';$("#cl",b).querySelectorAll("code").forEach(x=>{const cp=()=>{navigator.clipboard&&navigator.clipboard.writeText(x.dataset.c).catch(()=>{});x.textContent="Copied!";setTimeout(()=>x.textContent=x.dataset.c,1000)};x.onclick=cp;x.onkeydown=e=>e.key==="Enter"&&cp()})};$("#cq",b).oninput=r;r()}},
+invite:{t:"Invite",i:"plus",g:"#34c3ff,#174DFF",w:440,h:340,dock:1,url:"invite",body:()=>`<div class="bd" style="text-align:center"><div class="logo" style="margin:10px auto 16px">${ic("bot")}</div><h1>Add ${N} to your server</h1><p class="mut">Placeholder: explain the value of inviting the bot.</p><div class="row" style="justify-content:center;margin-top:22px">${link(CFG.invite,"Add to Discord",1).replace("btn p","btn p big")}</div>${CFG.invite?"":'<div class="note">Set <code>CFG.invite</code> to your Discord OAuth invite URL.</div>'}</div>`},
+support:{t:"Support",i:"life",g:"#8374FF,#572BFF",w:460,h:340,dock:1,url:"support",body:()=>`<div class="bd"><h1>Support</h1><p>Need help? Join the community or read the docs.</p><div class="row">${link(CFG.support,"Join Support Server",1)}<button class="btn" data-open="dash">${ic("ctl")} Dashboard</button></div>${CFG.support?"":'<div class="note">Set <code>CFG.support</code> to your support server invite.</div>'}<h3>Troubleshooting</h3><p class="mut">Placeholder: common issues and where to find answers.</p></div>`},
+docs:{t:"Documentation",i:"book",g:"#5ac8fa,#4B27FF",w:640,h:460,dock:0,body:()=>`<div class="split"><div class="side">${DOCS.map((d,i)=>`<button data-d="${i}">${d[0]}</button>`).join("")}</div><div class="main" id="dm"></div></div>`,init(b){const s=i=>{b.querySelectorAll("[data-d]").forEach(x=>x.classList.toggle("on",+x.dataset.d===i));$("#dm",b).innerHTML=`<h1>${DOCS[i][0]}</h1><p>${DOCS[i][1]}</p><div class="note">Placeholder documentation.</div>${CFG.docsUrl?`<div class="row">${link(CFG.docsUrl,"Open full docs")}</div>`:""}`};b.querySelectorAll("[data-d]").forEach(x=>x.onclick=()=>s(+x.dataset.d));s(0)}},
+dash:{t:'Dashboard',i:'ctl',g:'#8a93c9,#3c4482',w:900,h:620,dock:1,body:()=>`<style>.dsh{display:flex;flex-direction:column;height:100%}.dsh .split{height:auto;flex:1;min-height:0}.dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:14px}.dc{padding:16px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.05);text-align:center}.dc img,.dc .ph{width:52px;height:52px;border-radius:50%;margin:0 auto 8px;display:grid;place-items:center;background:rgba(255,255,255,.12);object-fit:cover}.dc b{display:block;margin-bottom:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dtop{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}.dtop b{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fr{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--line)}.fr small{display:block;color:var(--muted)}.fr .inp{width:auto;min-width:170px;max-width:270px}.fr textarea.inp{width:270px}.main h3{margin:0 0 6px}.sub{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.sub .inp{width:auto;flex:1;min-width:110px}</style><div class='dsh' id='ds'></div>`,init(b){const A=CFG.apiUrl,R=$('#ds',b);let me,cfg,gid,gn,mod='general',D={},X={},P=[],T=[],W=[],O=new Set();
+const esc=s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])).split(String.fromCharCode(34)).join('&quot;').split(String.fromCharCode(39)).join('&#39;');
+const api=(p,o)=>fetch(A+p,Object.assign({credentials:'include',headers:{'Content-Type':'application/json'}},o)).then(async r=>{if(!r.ok){throw new Error(r.status===401?'auth':((await r.text()).slice(0,120)||r.status))}return r.json()});
+const DEF={dm_actions:'1',antinuke_revert:'1',antinuke_limit:'3',antinuke_window:'10',antinuke_action:'ban',raid_joins:'8',raid_window:'10',raid_action:'kick',raid_minutes:'10',verify_risk:'4',verify_minage:'0',verify_action:'flag',verify_logmode:'all',blocked_server_action:'kick',honeypot_action:'softban',honeypot_reinvite:'1',warn_expiry:'0',automod_action_words:'delete'};
+const L=['moderation','messages','members','voice','server-logs','honeypot','automod','security','tickets','verify'],AF=['spam','links','invites','caps','mentions','emoji','zalgo','repeat'],ACT=['delete','warn','timeout','mute'];
+L.forEach(k=>DEF['logs_'+k]='1');AF.forEach(f=>DEF['automod_action_'+f]=f==='spam'?'timeout':'delete');
+const MODS=[['general','General',[['prefix','Text prefix','tx','1-5 characters, default $'],['dm_actions','DM members when actioned','tg'],['warn_expiry','Warnings expire after (days, 0 = never)','nm'],['sticky_roles','Sticky roles','tg','Members get their roles back when they rejoin'],['autorole','Autorole','rl','Given to every new member'],['main_role','Main role','rl','Locked with @everyone by /chat lock'],['mute_role','Muted role','rl']]],
+['logs','Logs',[['log_channel','Default log channel','ch']].concat(...L.map(k=>[['logs_'+k,k+' logs','tg'],['logch_'+k,k+' channel','ch','Empty = default channel']]))],
+['punish','Punishments',[],'P'],
+['automod','AutoMod',[].concat(...AF.map(f=>[['automod_'+f,f+' filter','tg'],['automod_action_'+f,f+' action','sl','',ACT]])).concat([['automod_action_words','Blocked words action','sl','Words are managed with /filter',ACT]])],
+['protect','Protection',[['antinuke','Anti-nuke','tg'],['antinuke_limit','Point limit','nm','Default 3'],['antinuke_window','Window (seconds)','nm'],['antinuke_action','Punishment','sl','',['ban','kick','strip']],['antinuke_botadd','Remove unauthorized bots','tg'],['antinuke_revert','Auto-revert attacker changes','tg'],['raidmode','Raid mode','tg'],['raid_joins','Joins that count as a raid','nm'],['raid_window','Raid window (seconds)','nm'],['raid_action','Raider action','sl','',['kick','ban','timeout']],['raid_minutes','Auto-off after (minutes)','nm'],['raid_lock','Lock server during raids','tg'],['raid_alert_role','Raid alert role','rl']],'W'],
+['verify','Verification',[['verify_role','Verified role','rl','Post the panel in Discord with /verify setup'],['verify_unverified','Unverified role','rl'],['verify_action','Action on high risk','sl','',['flag','review','block','kick']],['verify_risk','Risk threshold (1-10)','nm'],['verify_minage','Minimum account age (days)','nm'],['verify_timeout','Kick if not verified within (hours, 0 = off)','nm'],['verify_logmode','Log entries','sl','',['all','risky']],['verify_alert_role','Alert role','rl'],['blocked_server_action','Banned-server action','sl','',['kick','ban']]]],
+['tickets','Tickets',[['ticket_category','Ticket category','cat'],['ticket_support_roles','Support roles','rls','Can claim tickets. Hold Ctrl or Cmd to pick several'],['ticket_viewer_roles','Viewer roles','rls','See every ticket, cannot claim'],['ticket_blacklist_roles','Blacklisted roles','rls','Cannot open tickets'],['ticket_transcript_channel','Transcript channel','ch'],['ticket_panel_title','Panel title','tx'],['ticket_panel_desc','Panel text','ta']],'TP'],
+['welcome','Welcome and leave',[['welcome_channel','Welcome channel','ch'],['welcome_msg','Welcome message','ta','{user} {name} {server} {count}'],['leave_channel','Leave channel','ch'],['leave_msg','Leave message','ta']]],
+['honeypot','Honeypot',[['honeypot_action','Action','sl','Set up the channel with /honeypot setup',['softban','ban','disabled']],['honeypot_reinvite','Send rejoin invite on softban','tg']]],
+['triggers','Triggers',[],'T'],['cmds','Commands',[],'C']];
+const val=k=>D[k]!==undefined?D[k]:cfg.settings[k];
+const fld=f=>{const k=f[0],t=f[2],v=val(k),d=v==null?DEF[k]:v;let c;
+if(t==='tg')c=`<button class='tg' role='switch' aria-label='${esc(f[1])}' data-k='${k}' aria-checked='${d==='1'}'></button>`;
+else if(t==='ch'||t==='cat'||t==='rl'){const s=t==='ch'?cfg.channels:t==='cat'?cfg.categories:cfg.roles,p=t==='ch'?'#':t==='rl'?'@':'';c=`<select class='inp' data-k='${k}'><option value=''>none</option>${s.map(x=>`<option value='${x.id}' ${d===x.id?'selected':''}>${esc(p+x.name)}</option>`).join('')}</select>`}
+else if(t==='rls'){const s=new Set(String(d||'').split(','));c=`<select class='inp' multiple size='4' data-k='${k}'>${cfg.roles.map(x=>`<option value='${x.id}' ${s.has(x.id)?'selected':''}>@${esc(x.name)}</option>`).join('')}</select>`}
+else if(t==='sl')c=`<select class='inp' data-k='${k}'>${f[4].map(x=>`<option ${d===x?'selected':''}>${x}</option>`).join('')}</select>`;
+else if(t==='ta')c=`<textarea class='inp' rows='3' data-k='${k}'>${esc(d)}</textarea>`;
+else c=`<input class='inp' type='${t==='nm'?'number':'text'}' data-k='${k}' value='${esc(d)}'>`;
+return `<div class='fr'><div><b>${f[1]}</b>${f[3]?`<small>${f[3]}</small>`:''}</div>${c}</div>`};
+const wn=id=>{const w=cfg.whitelist.find(x=>x.id===id);return w&&w.name?w.name+' ('+id+')':id};
+const draw=()=>{const m=MODS.find(x=>x[0]===mod),sp=m[3];let h=`<h3>${m[1]}</h3>`+m[2].map(fld).join('');
+if(sp==='P')h+=`<p class='mut'>Automatic punishments at a warning count.</p>`+P.map((r,i)=>`<div class='sub'><input class='inp' type='number' data-p='${i}.n' value='${esc(r.n)}' aria-label='Warnings'><select class='inp' data-p='${i}.a'>${['timeout','mute','kick','ban'].map(x=>`<option ${r.a===x?'selected':''}>${x}</option>`).join('')}</select><input class='inp' data-p='${i}.d' value='${esc(r.d)}' placeholder='Duration, e.g. 1h'><button class='btn' data-a='prm${i}'>Remove</button></div>`).join('')+`<div class='row'><button class='btn' data-a='padd'>Add rule</button></div>`;
+if(sp==='W')h+=`<h3 style='margin-top:18px'>Whitelist</h3><p class='mut'>Exempt from AutoMod and anti-nuke (user IDs).</p>`+W.map((id,i)=>`<div class='sub'><span style='flex:1'>${esc(wn(id))}</span><button class='btn' data-a='wrm${i}'>Remove</button></div>`).join('')+`<div class='sub'><input class='inp' id='wid' placeholder='User ID'><button class='btn' data-a='wadd'>Add</button></div>`;
+if(sp==='T')h+=`<p class='mut'>Reply automatically when a message matches. Variables: {user} {name} {server} {count}</p>`+T.map((t,i)=>`<div class='sub' style='align-items:flex-start'><input class='inp' data-t='${i}.phrase' value='${esc(t.phrase)}' placeholder='Phrase'><select class='inp' data-t='${i}.match'>${['contains','exact','starts'].map(x=>`<option ${t.match===x?'selected':''}>${x}</option>`).join('')}</select><textarea class='inp' rows='2' data-t='${i}.response' placeholder='Reply'>${esc(t.response)}</textarea><button class='btn' data-a='trm${i}'>Remove</button></div>`).join('')+`<div class='row'><button class='btn' data-a='tadd'>Add trigger</button></div>`;
+if(sp==='C')h+=`<input class='inp' id='cq' placeholder='Search commands' aria-label='Search commands' style='margin:8px 0'>`+cfg.commands.map(c=>`<div class='fr' data-n='${esc(c.name+' '+c.category)}'><div><b>${esc(c.name)}</b><small>${esc(c.description)}</small></div><button class='tg' role='switch' aria-label='${esc(c.name)}' data-c='${esc(c.name)}' aria-checked='${!O.has(c.name)}'></button></div>`).join('');
+if(sp==='TP')h+=`<h3 style='margin-top:18px'>Post the ticket panel</h3><div class='sub'><select class='inp' id='pc'>${cfg.channels.map(x=>`<option value='${x.id}'>#${esc(x.name)}</option>`).join('')}</select><button class='btn p' data-a='post'>Save and post panel</button></div>`;
+$('#mn',R).innerHTML=h};
+const st=t=>{const e=$('#st',R);if(e)e.textContent=t};
+const dirty=()=>{const s=$('#sv',R);if(s){s.disabled=!(Object.keys(D).length||Object.keys(X).length);st('')}};
+const v2=t=>t.multiple?[...t.selectedOptions].map(o=>o.value).join(','):t.value;
+const save=async()=>{const q={settings:D};if(X.p)q.punish=Object.fromEntries(P.filter(r=>/^[0-9]+$/.test(r.n)&&+r.n>0).map(r=>[r.n,r.a+'|'+r.d]));if(X.t)q.triggers=T.filter(t=>t.phrase&&t.response);if(X.w)q.whitelist=W;if(X.c)q.disabled=[...O];st('Saving...');try{await api('/api/guilds/'+gid+'/config',{method:'PUT',body:JSON.stringify(q)});Object.assign(cfg.settings,D);D={};X={};dirty();st('Saved')}catch(e){st('Failed: '+e.message)}};
+const act=async a=>{if(a==='padd'){P.push({n:'',a:'mute',d:''});X.p=1}else if(a.startsWith('prm')){P.splice(+a.slice(3),1);X.p=1}else if(a==='tadd'){T.push({phrase:'',response:'',match:'contains'});X.t=1}else if(a.startsWith('trm')){T.splice(+a.slice(3),1);X.t=1}else if(a==='wadd'){const v=$('#wid',R).value.trim();if(/^[0-9]{15,25}$/.test(v)&&!W.includes(v)){W.push(v);X.w=1}}else if(a.startsWith('wrm')){W.splice(+a.slice(3),1);X.w=1}else if(a==='post'){await save();try{await api('/api/guilds/'+gid+'/ticketpanel',{method:'POST',body:JSON.stringify({channel:$('#pc',R).value})});st('Panel posted')}catch(e){st('Failed: '+e.message)}return}draw();dirty()};
+const shell=()=>{R.innerHTML=`<div class='dtop'><button class='btn' id='bk'>Servers</button><b>${esc(gn)}</b><span class='mut' id='st'></span><button class='btn p' id='sv' disabled>Save changes</button></div><div class='split'><div class='side'>${MODS.map(m=>`<button data-m='${m[0]}' class='${m[0]===mod?'on':''}'>${m[1]}</button>`).join('')}</div><div class='main' id='mn'></div></div>`;
+$('#bk',R).onclick=servers;$('#sv',R).onclick=save;
+R.querySelectorAll('[data-m]').forEach(x=>x.onclick=()=>{mod=x.dataset.m;R.querySelectorAll('[data-m]').forEach(y=>y.classList.toggle('on',y===x));draw()});
+const mn=$('#mn',R);
+mn.onclick=e=>{const t=e.target.closest('button');if(!t)return;if(t.classList.contains('tg')){const v=t.getAttribute('aria-checked')!=='true';t.setAttribute('aria-checked',v);if(t.dataset.k){D[t.dataset.k]=v?'1':'0'}else if(t.dataset.c){v?O.delete(t.dataset.c):O.add(t.dataset.c);X.c=1}dirty()}else if(t.dataset.a)act(t.dataset.a)};
+mn.oninput=mn.onchange=e=>{const t=e.target,d=t.dataset;if(d.k&&!t.classList.contains('tg')){D[d.k]=v2(t);dirty()}else if(d.p){const s=d.p.split('.');P[+s[0]][s[1]]=t.value;X.p=1;dirty()}else if(d.t){const s=d.t.split('.');T[+s[0]][s[1]]=t.value;X.t=1;dirty()}else if(t.id==='cq'){const q=t.value.toLowerCase();mn.querySelectorAll('[data-n]').forEach(r=>r.style.display=r.dataset.n.toLowerCase().includes(q)?'':'none')}};
+draw()};
+const opn=async id=>{gid=id;gn=me.guilds.find(s=>s.id===id).name;D={};X={};R.innerHTML=`<div class='bd mut'>Loading...</div>`;try{cfg=await api('/api/guilds/'+id+'/config')}catch(e){R.innerHTML=`<div class='bd'><div class='note'>${esc(e.message)}</div><div class='row'><button class='btn' id='bk'>Back</button></div></div>`;$('#bk',R).onclick=servers;return}
+P=Object.entries(cfg.punish).map(e=>{const s=e[1].split('|');return{n:e[0],a:s[0],d:s[1]||''}});T=cfg.triggers.map(t=>Object.assign({},t));W=cfg.whitelist.map(w=>w.id);O=new Set(cfg.commands.filter(c=>!c.enabled).map(c=>c.name));shell()};
+const login=m=>{R.innerHTML=`<div class='bd' style='text-align:center'><div class='logo' style='margin:18px auto'>${ic('ctl')}</div><h1>${N} Dashboard</h1><p class='mut'>Log in with Discord to manage the servers where ${N} is installed.</p><div class='row' style='justify-content:center'><a class='btn p big' href='${esc(A)}/api/login'>Login with Discord</a></div>${m?`<div class='note'>${esc(m)}</div>`:''}</div>`};
+const servers=async()=>{try{me=await api('/api/me')}catch(e){return login(e.message==='auth'?'':'Could not reach the dashboard API ('+A+'). '+e.message)}
+const card=s=>`<div class='dc'>${s.icon?`<img src='${esc(s.icon)}' alt=''>`:`<div class='ph'>${esc(s.name[0])}</div>`}<b title='${esc(s.name)}'>${esc(s.name)}</b>${s.has_bot?`<button class='btn p' data-g='${s.id}'>Go to dashboard</button>`:`<a class='btn' href='${esc(s.invite)}' target='_blank' rel='noopener'>Invite ${N}</a>`}</div>`;
+R.innerHTML=`<div class='bd'><div class='row' style='margin:0 0 4px'><h1 style='flex:1'>Your servers</h1><span class='mut'>${esc(me.name)}</span><button class='btn' id='lo'>Log out</button></div><p class='mut'>Servers where you can manage the server. Pick one to configure it.</p><div class='dg'>${me.guilds.map(card).join('')||'<p class=mut>No manageable servers found.</p>'}</div></div>`;
+R.querySelectorAll('[data-g]').forEach(x=>x.onclick=()=>opn(x.dataset.g));
+$('#lo',R).onclick=async()=>{try{await api('/api/logout',{method:'POST'})}catch(e){}login()}};
+servers()}},
+tos:{t:"Terms of Service",i:"file",g:"#a3a8ff,#4B27FF",w:620,h:480,dock:1,body:()=>legal("Terms of Service",TOS),init:legalInit},
+privacy:{t:"Privacy Policy",i:"lock",g:"#4f7bff,#102BA8",w:620,h:480,dock:1,body:()=>legal("Privacy Policy",PRIV),init:legalInit},
+settings:{t:"Settings",i:"gear",g:"#8a93c9,#3c4482",w:440,h:380,dock:1,body:()=>`<div class="bd"><h1>Settings</h1><div class="sw"><span>Reduce motion</span><button class="tg" role="switch" aria-label="Reduce motion" id="rm" aria-checked="${store.get("rm")==="1"}"></button></div><div class="sw"><span>Wallpaper tone</span><div class="pills" style="margin:0" id="wp">${["graphite","silver","ink"].map(w=>`<button data-w="${w}">${w}</button>`).join("")}</div></div><div class="sw"><span>Window positions</span><button class="btn" id="rst">Reset</button></div></div>`,init(b){const rm=$("#rm",b);rm.onclick=()=>{const v=rm.getAttribute("aria-checked")!=="true";rm.setAttribute("aria-checked",v);setRM(v)};const sw=()=>b.querySelectorAll("[data-w]").forEach(x=>x.classList.toggle("on",x.dataset.w===document.documentElement.dataset.wp));b.querySelectorAll("[data-w]").forEach(x=>x.onclick=()=>{setWP(x.dataset.w);sw()});sw();$("#rst",b).onclick=resetWins}},
+site:{t:"About This Website",i:"bot",g:"#7865FF,#174DFF",w:400,h:300,dock:0,body:()=>`<div class="bd" style="text-align:center"><div class="logo" style="margin:6px auto 14px">${ic("bot")}</div><h1>${N}</h1><p class="mut">An interactive desktop-style site. Open apps from the dock, drag windows by the title bar, right-click the desktop, or press Ctrl/Cmd+K.</p></div>`}
+};
+const ORDER=["about","features","commands","|","invite","support","dash","|","tos","privacy","|","settings"];
+
+const RAW=`
+#Moderation
+/mod ban <user> [reason] :: Ban a member :: Ban Members
+/mod unban <user_id> [reason] :: Unban a user by ID :: Ban Members
+/mod kick <member> [reason] :: Kick a member :: Kick Members
+/mod softban <member> [reason] :: Ban then unban to wipe recent messages :: Ban Members
+/mod tempban <user> <duration> [reason] :: Ban for a set time :: Ban Members
+/mod massban <ids> :: Ban up to 50 users at once :: Ban Members
+/mod timeout <member> <duration> [reason] :: Timeout a member (max 28d) :: Moderate Members
+/mod untimeout <member> :: Remove a timeout :: Moderate Members
+/mod mute <member> [duration] [reason] :: Mute with the muted role :: Moderate Members
+/mod unmute <member> :: Unmute and restore roles :: Moderate Members
+/mod jail <member> [reason] :: Strip roles and restrict a member :: Manage Roles, Moderate Members
+/mod unjail <member> :: Release a member and restore roles :: Manage Roles, Moderate Members
+/mod strip <member> :: Remove roles with dangerous permissions :: Manage Roles
+/mod nick <member> [name] :: Change or reset a nickname :: Manage Nicknames
+~decancer <member> :: Normalize an unreadable nickname :: Manage Nicknames
+~timeouts :: List timed out members :: Moderate Members
+#Cases and Warnings
+/cases warn <member> [reason] :: Warn a member (auto-punishments apply) :: Moderate Members
+/cases warnings <member> :: Show a member's warnings :: Moderate Members
+/cases clearwarns <member> :: Clear all warnings :: Moderate Members
+/cases warnlist <user> :: Warnings with case ID, mod and time :: Moderate Members
+/cases purgewarn <case_id> :: Remove one warning :: Moderate Members
+/cases pwarnings [warns] [action] [duration] :: Auto-punish at a warn count :: Manage Server
+/cases warnexpiry <days> :: Warnings expire after N days (0 = never) :: Manage Server
+/cases note <member> <text> :: Add a private staff note :: Moderate Members
+/cases notes <user> :: Show staff notes :: Moderate Members
+/cases history <user> :: Full moderation history :: Moderate Members
+/cases case <number> :: Look up a case :: Moderate Members
+/cases reason <number> <text> :: Edit a case reason :: Moderate Members
+/cases bans :: Show the most recent bans :: Ban Members
+/cases jailed :: List jailed members :: Moderate Members
+~delcase <number> :: Delete a case :: Moderate Members
+~modstats [moderator] :: Moderation action counts :: Moderate Members
+#Channels and Chat
+/purge <amount> [filter] [user] :: Bulk delete messages (1-500 or all) :: Manage Messages
+/slowmode <seconds> :: Set channel slowmode (0 = off) :: Manage Channels
+/chat lock :: Lock the channel for @everyone and the main role :: Manage Channels
+/chat unlock :: Unlock the channel :: Manage Channels
+/chat unhide :: Make the channel visible again :: Manage Channels
+/chat lockdown <enabled> :: Lock or unlock every text channel :: Administrator
+/chat nuke :: Clone and delete the channel to wipe it :: Manage Channels
+~hide :: Hide the channel from @everyone :: Manage Channels
+/say <text> :: Send a message as the bot :: Manage Messages
+/stick [text] :: Stick a message to the bottom of the channel :: Manage Messages
+/unstick :: Remove the sticky message :: Manage Messages
+~stickies :: List sticky messages :: Manage Messages
+~snipe :: Show the last deleted message :: Manage Messages
+~editsnipe :: Show the last edited message :: Manage Messages
+~pin <message_id> :: Pin a message :: Manage Messages
+~unpin <message_id> :: Unpin a message :: Manage Messages
+/channel create <name> [kind] :: Create a text or voice channel :: Manage Channels
+/channel delete [channel] :: Delete a channel :: Manage Channels
+/channel rename <channel> <name> :: Rename a channel :: Manage Channels
+/channel topic <text> :: Set this channel's topic :: Manage Channels
+/channel clone [channel] :: Clone a channel :: Manage Channels
+/channel nsfw :: Toggle NSFW on this channel :: Manage Channels
+/emoji add <source> [name] :: Add an emoji :: Manage Expressions
+/emoji remove <name> :: Remove an emoji :: Manage Expressions
+/emoji list :: List server emojis :: Manage Expressions
+#Roles
+/role toggle <member> <role> :: Give a role, or take it if they have it :: Manage Roles
+/role add <member> <role> :: Give a member a role :: Manage Roles
+/role remove <member> <role> :: Remove a role from a member :: Manage Roles
+/role all <role> [include_bots] :: Give a role to everyone :: Manage Roles
+/role create <name> [color] :: Create a role :: Manage Roles
+/role delete <role> :: Delete a role :: Manage Roles
+/role color <role> <color> :: Change a role's color :: Manage Roles
+/role rename <role> <name> :: Rename a role :: Manage Roles
+/role members <role> :: List members with a role :: Manage Roles
+/autorole [role] :: Role given to every new member :: Manage Server
+/stickyroles [setting] :: Restore roles when members rejoin :: Manage Server
+/reactrole add <message_id> <emoji> <role> :: Add a reaction role :: Manage Roles
+/reactrole remove <message_id> <emoji> :: Remove a reaction role :: Manage Roles
+/reactrole list :: List reaction roles :: Manage Roles
+~allow <role> <command> :: Let a role use a command :: Manage Server
+~block <role> [command] :: Take a command away from a role :: Manage Server
+~allowed :: Show which roles can use which commands :: Manage Server
+~admin [role] :: Make a role an admin role :: Manage Server
+~unadmin <role> :: Remove an admin role :: Manage Server
+~staff [role] :: Add or remove a staff role :: Manage Server
+~moderator [role] :: Add or remove a moderator role :: Manage Server
+~stafflist :: Show admin, moderator and staff roles
+#Protection
+/protect automod <filter> <enabled> :: Toggle an AutoMod filter :: Manage Server
+/protect automodaction <filter> <action> :: Set what AutoMod does :: Manage Server
+/protect automodignore <channel> :: Channels and roles AutoMod skips :: Manage Server
+/protect antinuke <enabled> :: Toggle anti-nuke :: Administrator
+/protect antinukeconfig [limit] [window] [action] :: Tune anti-nuke :: Administrator
+/protect raidmode <enabled> :: Toggle raid mode :: Manage Server
+/protect raidconfig [joins] [window] [action] :: Tune anti-raid :: Manage Server
+/protect whitelist [user] [remove] :: Exempt a user from AutoMod and anti-nuke :: Administrator
+/filter add <word> :: Block a word :: Manage Server
+/filter remove <word> :: Unblock a word :: Manage Server
+/filter list :: Show blocked words :: Manage Server
+/honeypot setup [channel] :: Create the honeypot trap channel :: Manage Server, Manage Channels
+/honeypot config :: Open honeypot settings :: Manage Server
+/honeypot off :: Turn the honeypot off :: Manage Server
+/honeypot status :: Show honeypot settings and triggers :: Manage Server
+/bannedserver add <server_id> [reason] :: Ban a whole Discord server :: Ban Members
+/bannedserver remove <server_id> :: Unban a Discord server :: Ban Members
+/bannedserver list :: List banned servers :: Ban Members
+/bannedserver action <action> :: Kick or ban members of banned servers :: Manage Server
+#Verification
+/verify setup <role> [mode] [channel] :: Post a verify panel :: Manage Server
+/verify off :: Turn verification off :: Manage Server
+/verify status :: Show verify settings :: Manage Server
+/verify minage <days> :: Accounts younger than this look risky :: Manage Server
+/verify threshold <score> :: Risk score for high risk :: Manage Server
+/verify action <action> :: Flag, review, block or kick high-risk members :: Manage Server
+/verify unverified [role] :: Role for members who haven't verified :: Manage Server
+/verify timeout <hours> :: Kick members who don't verify in time :: Manage Server
+/verify logmode <mode> :: Log every verification or only risky ones :: Manage Server
+/verify alertrole [role] :: Role pinged for risky joins :: Manage Server
+/verify check <member> [other] :: Alt check on a member :: Manage Server
+/verify alts <user> :: Find possible alts of a user :: Manage Server
+/verify history <user> :: A user's verification attempts :: Manage Server
+/verify pending :: Members waiting for staff review :: Manage Server
+/verify stats :: Verification results from the last 7 days :: Manage Server
+/verify unverify <member> :: Make a member verify again :: Manage Roles
+/verify style <enabled> :: Writing-style alt matching :: Manage Server
+/verify cluster <user> :: Network of accounts linked to a user :: Manage Server
+/verify altscan :: Sweep the server for linked accounts :: Manage Server
+/verify altstatus :: What the alt detector knows :: Manage Server
+/verify forget <user> :: Delete stored alt data for a user :: Manage Server
+/verify linkdata <mode> :: Link evidence on or off :: Manage Server
+#Tickets
+/ticket setup [category] [channel] :: Post the ticket panel :: Manage Server
+/ticket addrole <role> :: Add a support role :: Manage Server
+/ticket removerole <role> :: Remove a support role :: Manage Server
+/ticket addviewer <role> :: Add a role that sees every ticket :: Manage Server
+/ticket removeviewer <role> :: Remove a viewer role :: Manage Server
+/ticket viewers :: Show viewer roles :: Manage Server
+/ticket roles :: Show support and viewer roles :: Manage Server
+/ticket transcriptchannel [channel] :: Set where transcripts go :: Manage Server
+/ticket title [text] :: Set the panel title :: Manage Server
+/ticket description [text] :: Set the panel text :: Manage Server
+/ticket preview :: Preview the ticket panel :: Manage Server
+/ticket panel [channel] :: Post a fresh ticket panel :: Manage Server
+/ticket off :: Turn tickets off :: Manage Server
+/ticket close :: Close this ticket (locks it for the opener)
+/ticket open :: Reopen a closed ticket (support only)
+/ticket transcript :: Save this ticket's transcript
+/ticket delete :: Delete this ticket after a short countdown
+/ticketblacklist add <role> :: Stop a role from opening tickets :: Manage Server
+/ticketblacklist remove <role> :: Let a role open tickets again :: Manage Server
+/ticketblacklist list :: Show blacklisted roles :: Manage Server
+#Giveaways
+/giveaway create [channel] :: Create a giveaway with a form :: Manage Server
+/giveaway start <duration> <winners> <prize> :: Start a giveaway here :: Manage Server
+/giveaway end [message_id] :: End a giveaway and pick winners :: Manage Server
+/giveaway reroll [message_id] [count] :: Pick new winners :: Manage Server
+/giveaway list :: List running giveaways :: Manage Server
+~gdelete <message_id> :: Delete a giveaway without winners :: Manage Server
+~ghelp :: How giveaways work
+#Server Setup
+/setup config [log_channel] :: Set the log channel or view settings :: Manage Server
+/setup logs :: Interactive logging panel :: Manage Server
+/setup dmnotify <enabled> :: DM members when they are actioned :: Manage Server
+/setup tracking <enabled> :: Message counting on or off :: Administrator
+/setup mainrole [role] :: Role that lock also handles :: Manage Server
+/setup muterole [role] :: Choose or create the muted role :: Manage Roles
+~msgbackfill [channel] [limit] :: Import older messages for stats :: Manage Server
+/prefix list :: Show the current prefix
+/prefix change <new_prefix> :: Set a new prefix :: Manage Server
+/prefix off :: Turn the text prefix off :: Manage Server
+/prefix clear :: Reset the prefix to the default :: Manage Server
+/welcome set <channel> [message] :: Set the welcome message :: Manage Server
+/welcome off :: Turn welcome messages off :: Manage Server
+/welcome test :: Preview the welcome message :: Manage Server
+/leave set <channel> [message] :: Set the leave message :: Manage Server
+/leave off :: Turn leave messages off :: Manage Server
+/leave test :: Preview the leave message :: Manage Server
+/voicemeter setup :: Create join-to-create voice rooms :: Manage Channels
+/voicemeter panel :: Re-send the voice control panel :: Manage Channels
+/voicemeter remove :: Turn voicemeter off :: Manage Channels
+#Voice
+/voice kick <member> :: Disconnect a member from voice :: Move Members
+/voice move <member> <channel> :: Move a member to another channel :: Move Members
+/voice mute <member> :: Server-mute a member :: Mute Members
+/voice unmute <member> :: Remove a server mute :: Mute Members
+/voice deafen <member> :: Server-deafen a member :: Deafen Members
+/voice undeafen <member> :: Remove a server deafen :: Deafen Members
+#Info and Utility
+/help [command] :: Every command and how to use it
+~cmds :: Every slash command at a glance
+/info user [member] :: Member info, avatar, banner and roles
+/info server :: Server info
+/info role <role> :: Role info
+/info bot :: Bot stats
+/info avatar [user] :: Show someone's avatar
+/info invites :: Show active invites :: Manage Server
+/info messages [user] [options] :: Message analytics per user or channel
+/info ping :: Bot latency
+~uptime :: How long the bot has been online
+/tools afk [reason] :: Mark yourself AFK
+/tools remind <duration> <text> :: Get a reminder later
+/tools poll <question> :: Start a yes/no poll
+/tools report <member> <reason> :: Report a member to staff
+`;
+function parseCmds(){let cat="General";const out=[];RAW.split("\n").forEach(l=>{l=l.trim();if(!l)return;if(l[0]==="#"){cat=l.slice(1).trim();return}const p=l.split("::").map(s=>s.trim());let u=p[0];const po=u[0]==="~";if(po)u="<prefix>"+u.slice(1);const t=u.split(" ");const i=t.findIndex((x,j)=>j>0&&/^[<\[]/.test(x));out.push([(i<0?t:t.slice(0,i)).join(" "),cat,(p[1]||"")+(po?" (prefix only)":""),u,p[2]||"None"])});return out}
+COMMANDS=parseCmds();let LIVE=true;fetch(CFG.commandsUrl,{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(Array.isArray(d)&&d.length){COMMANDS=d.map(c=>Array.isArray(c)?c:[c.name,c.category||"General",c.description||"",c.usage||c.name,c.permissions||"None"]);LIVE=true}}).catch(()=>{});
+const wins={};let z=100,cascade=0;
+const setRM=v=>{document.documentElement.classList.toggle("rm",v);store.set("rm",v?"1":"0")};
+const setWP=w=>{document.documentElement.dataset.wp=w;store.set("wp",w)};
+setRM(store.get("rm")==="1");const w0=store.get("wp");setWP(["graphite","silver","ink"].includes(w0)?w0:"graphite");
+
+function openApp(id){const a=APPS[id];if(!a)return;
+ if(a.url&&CFG[a.url]){window.open(CFG[a.url],"_blank","noopener");return}
+ const w=wins[id];if(w){if(w.el.classList.contains("min"))w.el.classList.remove("min");focus(id);return}
+ const el=document.createElement("div");el.className="win";el.setAttribute("role","dialog");el.setAttribute("aria-label",a.t);
+ const n=cascade++%6;el.style.cssText=`width:${a.w}px;height:${a.h}px;left:${Math.max(10,(innerWidth-a.w)/2-60+n*30)}px;top:${60+n*30}px`;
+ el.dataset.l=el.style.left;el.dataset.t=el.style.top;
+ el.innerHTML=`<div class="tb"><div class="dots"><button class="r" aria-label="Close"></button><button class="y" aria-label="Minimize"></button><button class="g" aria-label="Zoom"></button></div><h2>${a.t}</h2></div>`;
+ const holder=document.createElement("div");holder.style.cssText="flex:1;display:flex;flex-direction:column;min-height:0";holder.innerHTML=a.body();holder.firstElementChild.style.flex="1";el.append(holder);
+ document.body.append(el);wins[id]={el};
+ el.onpointerdown=()=>focus(id);
+ $(".r",el).onclick=()=>closeApp(id);$(".y",el).onclick=()=>{el.classList.add("min");dockState();const nx=Object.keys(wins).filter(k=>!wins[k].el.classList.contains("min")).pop();nx&&focus(nx)};
+ $(".g",el).onclick=()=>el.classList.toggle("max");
+ el.querySelectorAll("[data-open]").forEach(x=>x.onclick=()=>openApp(x.dataset.open));
+ a.init&&a.init(holder);drag(el);focus(id)}
+function focus(id){const w=wins[id];if(!w)return;w.el.style.zIndex=++z;Object.values(wins).forEach(x=>x.el.classList.toggle("act",x===w));dockState()}
+function closeApp(id){const w=wins[id];if(!w)return;delete wins[id];w.el.classList.add("closing");setTimeout(()=>w.el.remove(),200);dockState()}
+function topWin(){return Object.keys(wins).filter(k=>!wins[k].el.classList.contains("min")).sort((a,b)=>wins[b].el.style.zIndex-wins[a].el.style.zIndex)[0]}
+function resetWins(){cascade=0;Object.values(wins).forEach((w,i)=>{w.el.classList.remove("max","min");w.el.style.left=(Math.max(10,innerWidth/2-300)+i*30)+"px";w.el.style.top=(60+i*30)+"px"});dockState()}
+function drag(el){const tb=$(".tb",el);tb.onpointerdown=e=>{if(e.target.closest(".dots")||innerWidth<=720||el.classList.contains("max"))return;const r=el.getBoundingClientRect(),dx=e.clientX-r.left,dy=e.clientY-r.top;el.classList.add("drag");tb.setPointerCapture(e.pointerId);tb.style.cursor="grabbing";
+ tb.onpointermove=m=>{el.style.left=Math.min(innerWidth-80,Math.max(80-r.width,m.clientX-dx))+"px";el.style.top=Math.min(innerHeight-60,Math.max(34,m.clientY-dy))+"px"};
+ tb.onpointerup=()=>{tb.onpointermove=tb.onpointerup=null;tb.style.cursor="";el.classList.remove("drag")}};
+ tb.ondblclick=e=>{if(!e.target.closest(".dots"))el.classList.toggle("max")}}
+
+/* Dock */
+$("#dock").innerHTML=ORDER.map(k=>{if(k==="|")return'<div class="sep"></div>';const a=APPS[k];return`<button class="dk" data-id="${k}" data-tip="${a.t.replace("About ","")}" aria-label="${a.t}" style="background:linear-gradient(145deg,${a.g})">${ic(a.i)}</button>`}).join("");
+document.querySelectorAll(".dk").forEach(b=>b.onclick=()=>openApp(b.dataset.id));
+function dockState(){document.querySelectorAll(".dk").forEach(b=>{const w=wins[b.dataset.id];b.classList.toggle("open",!!w&&!w.el.classList.contains("min"));b.classList.toggle("minz",!!w&&w.el.classList.contains("min"))})}
+
+/* Menus */
+const sel=()=>{const s=getSelection();return s&&s.toString()};
+const MENUS={[N]:()=>[["About This Website",()=>openApp("site")],"-",["Close All Windows",closeAll]],
+File:()=>[["Open About",()=>openApp("about")],["Close Window  ⌘W",()=>{const t=topWin();t&&closeApp(t)}],["Close All Windows",closeAll]],
+Edit:()=>[["Copy",()=>{sel()&&navigator.clipboard&&navigator.clipboard.writeText(sel()).catch(()=>{})}],["Select All",()=>{const t=topWin();if(t){const r=document.createRange();r.selectNodeContents($(".bd,.main",wins[t].el)||wins[t].el);const s=getSelection();s.removeAllRanges();s.addRange(r)}}]],
+View:()=>[["Show Desktop",()=>{Object.values(wins).forEach(w=>w.el.classList.add("min"));dockState()}],["Reset Windows",resetWins],["Search…  ⌘K",openSpot]],
+Window:()=>Object.keys(wins).length?Object.keys(wins).map(k=>[APPS[k].t,()=>{wins[k].el.classList.remove("min");focus(k)}]):[["No open windows",()=>{}]],
+Help:()=>[["About the Bot",()=>openApp("about")],["Dashboard",()=>openApp("dash")],["Support Server",()=>openApp("support")]]};
+function closeAll(){Object.keys(wins).forEach(closeApp)}
+const mbox=$("#menus"),dd=$("#dd");let openM=null;
+mbox.innerHTML=Object.keys(MENUS).map((k,i)=>`<button class="mi ${i?"":"app"}" aria-haspopup="true" data-m="${k}">${i?k:ic("bot")+" "+k}</button>`).join("");
+function showMenu(btn){hideAll();openM=btn;btn.classList.add("on");const r=btn.getBoundingClientRect();fill(dd,MENUS[btn.dataset.m]());dd.style.left=r.left+"px";dd.style.top=r.bottom+2+"px";dd.classList.add("show")}
+function fill(box,items){box.innerHTML=items.map(i=>i==="-"?"<hr>":`<button role="menuitem">${i[0].split("  ")[0]}<span class="k">${i[0].split("  ")[1]||""}</span></button>`).join("");const act=items.filter(i=>i!=="-");box.querySelectorAll("button").forEach((b,j)=>b.onclick=()=>{hideAll();act[j][1]()})}
+function hideAll(){dd.classList.remove("show");$("#ctx").classList.remove("show");openM&&openM.classList.remove("on");openM=null}
+mbox.querySelectorAll(".mi").forEach(b=>{b.onclick=e=>{e.stopPropagation();openM===b?hideAll():showMenu(b)};b.onmouseenter=()=>openM&&openM!==b&&showMenu(b)});
+document.addEventListener("click",hideAll);
+document.addEventListener("contextmenu",e=>{if(e.target.closest(".win,.mb,.dock"))return;e.preventDefault();const c=$("#ctx");fill(c,[["Search…",openSpot],["Show Desktop",MENUS.View()[0][1]],["Reset Windows",resetWins],["Close All Windows",closeAll],"-",["About This Website",()=>openApp("site")]]);c.style.left=Math.min(e.clientX,innerWidth-230)+"px";c.style.top=Math.min(e.clientY,innerHeight-220)+"px";c.classList.add("show")});
+
+/* Clock */
+const clk=()=>{$("#clock").textContent=new Date().toLocaleString([],{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}).replace(",","")};clk();setInterval(clk,1000);
+
+/* Spotlight */
+const sp=$("#spot"),spIn=$("#spIn");let spSel=0;
+const spList=()=>{const q=spIn.value.toLowerCase();return Object.keys(APPS).filter(k=>APPS[k].dock&&(APPS[k].t+" "+k).toLowerCase().includes(q))};
+const spDraw=()=>{const l=spList();spSel=Math.min(spSel,Math.max(0,l.length-1));$("#spRes").innerHTML=l.map((k,i)=>`<button class="${i===spSel?"on":""}" data-k="${k}">${ic(APPS[k].i)} ${APPS[k].t}</button>`).join("");$("#spRes").querySelectorAll("button").forEach(b=>b.onclick=()=>{closeSpot();openApp(b.dataset.k)})};
+function openSpot(){hideAll();sp.classList.add("show");spIn.value="";spSel=0;spDraw();setTimeout(()=>spIn.focus(),10)}
+function closeSpot(){sp.classList.remove("show")}
+spIn.oninput=()=>{spSel=0;spDraw()};
+sp.onclick=e=>{if(e.target===sp)closeSpot()};
+if(location.hash==="#dashboard")setTimeout(()=>openApp("dash"),300);$("#mbSearch").onclick=e=>{e.stopPropagation();openSpot()};
+document.addEventListener("keydown",e=>{
+ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();openSpot();return}
+ if(e.key==="Escape"){hideAll();closeSpot();return}
+ if(sp.classList.contains("show")){const n=spList().length;if(e.key==="ArrowDown"){e.preventDefault();spSel=(spSel+1)%n;spDraw()}if(e.key==="ArrowUp"){e.preventDefault();spSel=(spSel-1+n)%n;spDraw()}if(e.key==="Enter"){const k=spList()[spSel];if(k){closeSpot();openApp(k)}}}
+ else if((e.altKey)&&e.key.toLowerCase()==="w"){const t=topWin();t&&closeApp(t)}});
+</script>
+</body>
+</html>
