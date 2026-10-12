@@ -604,7 +604,7 @@ function drag(el){const tb=$(".tb",el);tb.onpointerdown=e=>{if(e.target.closest(
 
 /* Dock */
 $("#dock").innerHTML=ORDER.map(k=>{if(k==="|")return'<div class="sep"></div>';const a=APPS[k];return`<button class="dk" data-id="${k}" data-tip="${a.t.replace("About ","")}" aria-label="${a.t}" style="background:linear-gradient(145deg,${a.g})">${ic(a.i)}</button>`}).join("");
-document.querySelectorAll(".dk").forEach(b=>b.onclick=()=>openApp(b.dataset.id));
+document.querySelectorAll(".dk").forEach(b=>b.onclick=()=>{const w=wins[b.dataset.id];w&&!w.el.classList.contains("min")?closeApp(b.dataset.id):openApp(b.dataset.id)});
 function dockState(){document.querySelectorAll(".dk").forEach(b=>{const w=wins[b.dataset.id];b.classList.toggle("open",!!w&&!w.el.classList.contains("min"));b.classList.toggle("minz",!!w&&w.el.classList.contains("min"))})}
 
 /* Menus */
@@ -701,7 +701,10 @@ root.addEventListener("mouseleave",()=>{mx=my=-9999;has=false;cg.classList.remov
 
 /* Dock magnification + bounce on launch */
 const dock=$("#dock"),dks=$$(".dk",dock);
-dock.addEventListener("pointermove",e=>{if(small()||isRM()||e.pointerType==="touch")return;
+const dzone=e=>{const r=dock.getBoundingClientRect();return e.clientX>r.left-30&&e.clientX<r.right+30&&e.clientY>r.top-90&&e.clientY<r.bottom+20};
+const dreset=()=>{dock.classList.remove("mg");base=[];dks.forEach(k=>k.style.transform="")};
+document.addEventListener("pointermove",e=>{if(small()||isRM()||e.pointerType==="touch")return;
+ if(!dzone(e)){if(base.length)dreset();return}
  if(!base.length)base=dks.map(k=>k.offsetLeft+k.offsetWidth/2);
  const x=e.clientX,sc=base.map(b=>1+.42*Math.exp(-(((x-b)/64)**2)));let a=0;
  base.forEach((b,i)=>{if(Math.abs(x-b)<Math.abs(x-base[a]))a=i});
@@ -709,8 +712,8 @@ dock.addEventListener("pointermove",e=>{if(small()||isRM()||e.pointerType==="tou
  dks.forEach((k,i)=>{let tx=0;
   if(i>a){tx=ex[a]/2+ex[i]/2;for(let j=a+1;j<i;j++)tx+=ex[j]}
   else if(i<a){tx=-(ex[a]/2+ex[i]/2);for(let j=i+1;j<a;j++)tx-=ex[j]}
-  k.style.transform=`translate(${tx}px,${-(sc[i]-1)*40}px) scale(${sc[i]})`})});
-dock.addEventListener("pointerleave",()=>{dock.classList.remove("mg");base=[];dks.forEach(k=>k.style.transform="")});
+  k.style.transform=`translate(${tx}px,${-(sc[i]-1)*64}px) scale(${sc[i]})`})});
+document.documentElement.addEventListener("mouseleave",dreset);addEventListener("resize",()=>{base=[]});
 
 const _open=openApp;
 openApp=function(id){const a=APPS[id],fresh=!!a&&!wins[id]&&!(a.url&&CFG[a.url]);_open(id);
