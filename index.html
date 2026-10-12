@@ -122,9 +122,93 @@ svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stro
 .ghost{font-size:11px;opacity:.5;position:fixed;bottom:84px;left:0;right:0;text-align:center;z-index:1;pointer-events:none}
 html.rm *{animation:none!important;transition:none!important}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===================== ENHANCEMENTS ===================== */
+:root{--acc:#8f7bff;--acc-rgb:143,123,255}
+::selection{background:rgba(var(--acc-rgb),.45);color:#fff}
+*{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.28) transparent}
+
+/* Boot splash */
+#boot{position:fixed;inset:0;z-index:20000;display:grid;place-items:center;background:#050505;pointer-events:none;animation:bootout .5s 1.3s forwards}
+#boot .bl{display:grid;gap:18px;justify-items:center}
+#boot .logo{animation:bootpop .8s cubic-bezier(.2,1.4,.3,1) both}
+#boot b{letter-spacing:.5em;font-size:13px;font-weight:600;opacity:.85;margin-right:-.5em}
+#boot .bar{width:160px;height:3px;border-radius:9px;background:rgba(255,255,255,.12);overflow:hidden}
+#boot .bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,transparent,var(--acc),#fff);transform:translateX(-100%);animation:bload 1s .2s ease-in-out forwards}
+@keyframes bootout{to{opacity:0;visibility:hidden}}
+@keyframes bootpop{from{opacity:0;transform:scale(.6) rotate(-12deg)}}
+@keyframes bload{to{transform:none}}
+
+/* Living wallpaper */
+.wall::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 40%,transparent 50%,rgba(0,0,0,.5))}
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.cg{position:fixed;left:0;top:0;width:640px;height:640px;margin:-320px 0 0 -320px;border-radius:50%;z-index:1;pointer-events:none;background:radial-gradient(closest-side,rgba(var(--acc-rgb),.24),rgba(var(--acc-rgb),.07) 55%,transparent);mix-blend-mode:screen;will-change:transform;opacity:0;transition:opacity .6s}
+.cg.on{opacity:1}
+.ghost{animation:ghostout 1.5s 9s forwards}
+@keyframes ghostout{to{opacity:.2}}
+
+/* Menu bar + dock glow */
+.mb::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--acc-rgb),.8),transparent);background-size:200% 100%;animation:tbflow 8s linear infinite}
+@keyframes tbflow{to{background-position:200% 0}}
+.dock{box-shadow:0 20px 50px -10px rgba(1,3,35,.8),inset 0 1px 0 rgba(255,255,255,.2),0 0 46px -14px rgba(var(--acc-rgb),.55)}
+.dock.mg .dk{transition:transform .09s linear}
+.dk.bounce{animation:dkb .75s cubic-bezier(.3,.9,.4,1)}
+@keyframes dkb{30%{transform:translateY(-24px) scale(1.12)}55%{transform:none}75%{transform:translateY(-10px)}100%{transform:none}}
+.dk.open::after{background:var(--acc);box-shadow:0 0 8px var(--acc);opacity:1}
+
+/* Windows */
+.win{animation:open2 .42s cubic-bezier(.2,.9,.3,1)}
+@keyframes open2{0%{opacity:0;transform:scale(.88) translateY(24px)}60%{transform:scale(1.015)}100%{opacity:1;transform:none}}
+.win.act{box-shadow:0 30px 70px -10px rgba(1,3,35,.8),0 0 0 1px rgba(var(--acc-rgb),.35),0 0 44px -8px rgba(var(--acc-rgb),.4),inset 0 1px 0 rgba(255,255,255,.15)}
+.win.act .tb{background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(var(--acc-rgb),.14),rgba(255,255,255,.06));background-size:200% 100%;animation:tbflow 6s linear infinite}
+.win .item,.win .sw,.win .dc{animation:rise .5s cubic-bezier(.2,.9,.3,1) backwards}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+.bd h1,.main h1{background:linear-gradient(90deg,#fff 20%,var(--acc) 50%,#fff 80%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shim 5s linear infinite}
+@keyframes shim{to{background-position:200% center}}
+.logo{transition:transform .2s ease-out;animation:float 4s ease-in-out infinite,glowp 3s ease-in-out infinite}
+@keyframes float{50%{translate:0 -6px}}
+@keyframes glowp{50%{box-shadow:0 14px 40px -6px rgba(var(--acc-rgb),.75)}}
+
+/* Interactions */
+.btn{position:relative;overflow:hidden}
+.btn:hover{transform:translateY(-1px)}.btn:active{transform:scale(.97)}
+.btn.p::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);transform:skewX(-20deg);pointer-events:none}
+.btn.p:hover::after{animation:sheen .8s}
+@keyframes sheen{to{left:130%}}
+.pills button{position:relative;overflow:hidden;transition:.2s}
+.pills button.on{box-shadow:0 0 16px -4px rgba(var(--acc-rgb),.9)}
+.rip{position:absolute;border-radius:50%;background:rgba(255,255,255,.35);transform:scale(0);animation:rip .6s ease-out forwards;pointer-events:none}
+@keyframes rip{to{transform:scale(1);opacity:0}}
+.item{transition:transform .25s,background .25s}.item:hover{transform:translateX(4px)}
+.item .ic{transition:transform .25s cubic-bezier(.3,1.5,.5,1),box-shadow .25s}
+.item:hover .ic{transform:rotate(-6deg) scale(1.12);box-shadow:0 8px 20px -6px rgba(var(--acc-rgb),.8)}
+.cmd{transition:transform .2s,border-color .2s,box-shadow .2s}
+.cmd:hover{transform:translateY(-2px);border-color:rgba(var(--acc-rgb),.6);box-shadow:0 10px 24px -12px rgba(var(--acc-rgb),.8)}
+.dc{transition:transform .25s,border-color .25s,box-shadow .25s}
+.dc:hover{transform:translateY(-4px);border-color:rgba(var(--acc-rgb),.6);box-shadow:0 14px 30px -14px rgba(var(--acc-rgb),.8)}
+.tg[aria-checked="true"]{background:var(--acc)}
+.inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(var(--acc-rgb),.25)}
+.spot.show{backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+.sp{box-shadow:0 30px 80px rgba(1,3,35,.8),0 0 0 1px rgba(var(--acc-rgb),.3),0 0 60px -10px rgba(var(--acc-rgb),.45)}
+.swatches{display:flex;gap:8px}
+.swt{width:22px;height:22px;border-radius:50%;border:2px solid transparent;background:var(--c);box-shadow:0 0 12px -2px var(--c);transition:transform .15s,border-color .15s;padding:0}
+.swt:hover{transform:scale(1.22)}.swt.on{border-color:#fff}
+
+/* Toasts, confetti, snapping, havoc mode */
+.toasts{position:fixed;top:calc(40px + env(safe-area-inset-top,0px));right:14px;z-index:9900;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none}
+.toast{padding:9px 14px;border-radius:12px;background:rgba(18,18,20,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line);border-left:3px solid var(--acc);box-shadow:0 14px 34px -8px rgba(0,0,0,.7);font-weight:500;font-size:13px;animation:tin .4s cubic-bezier(.2,1.2,.3,1);transition:.3s}
+.toast.out{opacity:0;transform:translateX(24px)}
+@keyframes tin{from{opacity:0;transform:translateX(30px) scale(.9)}}
+.cf{position:fixed;width:7px;height:7px;border-radius:2px;z-index:30000;pointer-events:none}
+#snap{position:fixed;z-index:7000;border-radius:16px;background:rgba(var(--acc-rgb),.14);border:1.5px solid rgba(var(--acc-rgb),.65);pointer-events:none;opacity:0;transition:opacity .18s,left .18s,top .18s,width .18s,height .18s}
+#snap.on{opacity:1}
+html.havoc .win{animation:shake .3s infinite}
+@keyframes shake{25%{translate:-2px 1px}75%{translate:2px -1px}}
+@media(max-width:720px){.cg{display:none}.toasts{right:8px}}
 </style>
 </head>
 <body>
+<div id="boot" aria-hidden="true"><div class="bl"><div class="logo"><svg class="i" style="width:40px;height:40px"><use href="#bot"/></svg></div><b></b><div class="bar"><i></i></div></div></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="bot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 14h.01M15 14h.01"/></symbol>
 <symbol id="home" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8.5 15c1 1.5 6 1.5 7 0"/></symbol>
@@ -174,6 +258,7 @@ html.rm *{animation:none!important;transition:none!important}
 <div class="dd" id="dd" role="menu"></div>
 <div class="dd" id="ctx" role="menu"></div>
 <div class="ghost">Right-click the desktop · Ctrl/Cmd+K to search</div>
+<canvas id="fx" aria-hidden="true"></canvas><div class="cg" aria-hidden="true"></div><div class="toasts" id="toasts" aria-live="polite"></div>
 <div class="dockw"><nav class="dock" id="dock" aria-label="Dock"></nav></div>
 <div class="spot" id="spot"><div class="sp"><input id="spIn" placeholder="Spotlight Search" aria-label="Spotlight search"><div id="spRes"></div></div></div>
 
@@ -557,6 +642,132 @@ document.addEventListener("keydown",e=>{
  if(e.key==="Escape"){hideAll();closeSpot();return}
  if(sp.classList.contains("show")){const n=spList().length;if(e.key==="ArrowDown"){e.preventDefault();spSel=(spSel+1)%n;spDraw()}if(e.key==="ArrowUp"){e.preventDefault();spSel=(spSel-1+n)%n;spDraw()}if(e.key==="Enter"){const k=spList()[spSel];if(k){closeSpot();openApp(k)}}}
  else if((e.altKey)&&e.key.toLowerCase()==="w"){const t=topWin();t&&closeApp(t)}});
+
+/* ===================== ENHANCEMENTS: FX layer ===================== */
+(()=>{
+const root=document.documentElement,$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const isRM=()=>root.classList.contains("rm")||matchMedia("(prefers-reduced-motion:reduce)").matches;
+const small=()=>innerWidth<=720;
+
+/* Accent colour (persisted) */
+const ACCENTS={Aurora:"#8f7bff",Cyan:"#38d6ff",Rose:"#ff6b9d",Lime:"#9dff6b",Amber:"#ffb454",Mono:"#e4e4e8"};
+const paint=h=>{const n=parseInt(h.slice(1),16);root.style.setProperty("--acc",h);root.style.setProperty("--acc-rgb",[n>>16&255,n>>8&255,n&255].join(","))};
+let acc=store.get("acc");if(!ACCENTS[acc])acc="Aurora";
+const setAcc=n=>{acc=n;paint(ACCENTS[n]);store.set("acc",n)};paint(ACCENTS[acc]);
+
+/* Boot splash */
+const boot=$("#boot");
+if(boot){$("b",boot).textContent=N.toUpperCase();const kill=()=>boot.remove();
+ if(isRM())kill();else{setTimeout(kill,1900);const skip=()=>{boot.style.animation="bootout .25s forwards";setTimeout(kill,300)};addEventListener("pointerdown",skip,{once:true});addEventListener("keydown",skip,{once:true})}}
+
+/* Toasts */
+const tbox=$("#toasts");
+const toast=m=>{const t=document.createElement("div");t.className="toast";t.textContent=m;tbox.append(t);while(tbox.children.length>3)tbox.firstChild.remove();setTimeout(()=>{t.classList.add("out");setTimeout(()=>t.remove(),320)},2200)};
+
+/* Confetti */
+const burst=(x,y,n=18)=>{if(isRM())return;const a0=root.style.getPropertyValue("--acc"),cols=[a0,"#ffffff",a0,"#cfd2ff"];
+ for(let i=0;i<n;i++){const p=document.createElement("i");p.className="cf";p.style.cssText=`left:${x}px;top:${y}px;background:${cols[i%cols.length]}`;document.body.append(p);
+  const a=Math.random()*6.283,d=40+Math.random()*100;
+  const an=p.animate([{transform:"translate(-50%,-50%) scale(1)",opacity:1},{transform:`translate(calc(-50% + ${Math.cos(a)*d}px),calc(-50% + ${Math.sin(a)*d+34}px)) rotate(${Math.random()*540}deg) scale(.3)`,opacity:0}],{duration:650+Math.random()*350,easing:"cubic-bezier(.1,.7,.3,1)"});
+  an.onfinish=()=>p.remove()}};
+
+/* Living background: particle constellation + cursor glow */
+const cv=$("#fx"),cx=cv.getContext("2d"),cg=$(".cg");
+let W=0,H=0,P=[],mx=-9999,my=-9999,gx=0,gy=0,raf=0,has=false,base=[];
+const size=()=>{const D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;cx.setTransform(D,0,0,D,0,0);
+ const n=Math.min(small()?32:80,Math.round(W*H/18000));
+ while(P.length<n)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.32,vy:(Math.random()-.5)*.32,r:Math.random()*1.3+.5});P.length=n};
+const frame=()=>{const rm=isRM(),c=root.style.getPropertyValue("--acc-rgb");cx.clearRect(0,0,W,H);
+ if(has&&!rm){gx+=(mx-gx)*.14;gy+=(my-gy)*.14;cg.style.transform=`translate3d(${gx}px,${gy}px,0)`}
+ if(!rm)for(const p of P){p.x+=p.vx;p.y+=p.vy;const dx=p.x-mx,dy=p.y-my,d=dx*dx+dy*dy;
+  if(d<16000&&d>1){const s=Math.sqrt(d),f=(1-d/16000)*2.2;p.x+=dx/s*f;p.y+=dy/s*f}
+  if(p.x<-10)p.x=W+10;else if(p.x>W+10)p.x=-10;if(p.y<-10)p.y=H+10;else if(p.y>H+10)p.y=-10}
+ cx.lineWidth=1;
+ for(let i=0;i<P.length;i++){const a=P[i];
+  for(let j=i+1;j<P.length;j++){const b=P[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy;if(d<14400){cx.strokeStyle=`rgba(255,255,255,${(1-d/14400)*.16})`;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}}
+  const mdx=a.x-mx,mdy=a.y-my,md=mdx*mdx+mdy*mdy,near=md<40000;
+  if(near){cx.strokeStyle=`rgba(${c},${(1-md/40000)*.55})`;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(mx,my);cx.stroke()}
+  cx.fillStyle=near?`rgba(${c},.9)`:"rgba(255,255,255,.5)";cx.beginPath();cx.arc(a.x,a.y,a.r,0,6.283);cx.fill()}};
+const loop=()=>{frame();raf=(!isRM()&&!document.hidden)?requestAnimationFrame(loop):0};
+const start=()=>{if(!raf)raf=requestAnimationFrame(loop)};
+size();start();
+addEventListener("resize",()=>{size();base=[];start()});
+document.addEventListener("visibilitychange",start);
+new MutationObserver(start).observe(root,{attributes:true,attributeFilter:["class"]});
+addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;mx=e.clientX;my=e.clientY;
+ if(!has){has=true;gx=mx;gy=my;cg.classList.add("on")}
+ if(isRM()){gx=mx;gy=my;cg.style.transform=`translate3d(${gx}px,${gy}px,0)`}start()},{passive:true});
+root.addEventListener("mouseleave",()=>{mx=my=-9999;has=false;cg.classList.remove("on")});
+
+/* Dock magnification + bounce on launch */
+const dock=$("#dock"),dks=$$(".dk",dock);
+dock.addEventListener("pointermove",e=>{if(small()||isRM()||e.pointerType==="touch")return;
+ if(!base.length)base=dks.map(k=>k.offsetLeft+k.offsetWidth/2);
+ const x=e.clientX,sc=base.map(b=>1+.42*Math.exp(-(((x-b)/64)**2)));let a=0;
+ base.forEach((b,i)=>{if(Math.abs(x-b)<Math.abs(x-base[a]))a=i});
+ const ex=sc.map(s=>(s-1)*52);dock.classList.add("mg");
+ dks.forEach((k,i)=>{let tx=0;
+  if(i>a){tx=ex[a]/2+ex[i]/2;for(let j=a+1;j<i;j++)tx+=ex[j]}
+  else if(i<a){tx=-(ex[a]/2+ex[i]/2);for(let j=i+1;j<a;j++)tx-=ex[j]}
+  k.style.transform=`translate(${tx}px,${-(sc[i]-1)*40}px) scale(${sc[i]})`})});
+dock.addEventListener("pointerleave",()=>{dock.classList.remove("mg");base=[];dks.forEach(k=>k.style.transform="")});
+
+const _open=openApp;
+openApp=function(id){const a=APPS[id],fresh=!!a&&!wins[id]&&!(a.url&&CFG[a.url]);_open(id);
+ if(fresh&&wins[id]){$$(".item,.sw,.dc",wins[id].el).forEach((n,i)=>n.style.animationDelay=(i*55+120)+"ms");
+  if(!isRM()){const k=$(`.dk[data-id="${id}"]`);if(k){k.classList.remove("bounce");void k.offsetWidth;k.classList.add("bounce");setTimeout(()=>k.classList.remove("bounce"),800)}}}};
+
+/* Ripples on buttons */
+document.addEventListener("pointerdown",e=>{if(isRM()||!e.target.closest)return;const b=e.target.closest(".btn,.pills button");if(!b||b.disabled)return;
+ const r=b.getBoundingClientRect(),s=Math.max(r.width,r.height)*2,i=document.createElement("span");i.className="rip";
+ i.style.cssText=`width:${s}px;height:${s}px;left:${e.clientX-r.left-s/2}px;top:${e.clientY-r.top-s/2}px`;b.append(i);setTimeout(()=>i.remove(),600)});
+
+/* Feedback toasts for existing actions */
+document.addEventListener("click",e=>{const t=e.target;if(!t.closest)return;
+ const c=t.closest(".cmd code");if(c){burst(e.clientX,e.clientY,14);toast("Copied "+c.dataset.c);return}
+ const rm=t.closest("#rm");if(rm){toast(rm.getAttribute("aria-checked")==="true"?"Reduced motion on":"Animations on");return}
+ const w=t.closest("[data-w]");if(w){toast("Wallpaper tone: "+w.dataset.w);return}
+ if(t.closest("#rst"))toast("Windows reset")});
+
+/* Logo 3D tilt */
+document.addEventListener("pointermove",e=>{if(isRM()||!e.target.closest)return;const l=e.target.closest(".logo");if(!l)return;
+ const r=l.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+ l.style.transform=`perspective(300px) rotateX(${-y*28}deg) rotateY(${x*28}deg) scale(1.06)`});
+document.addEventListener("pointerout",e=>{if(!e.target.closest)return;const l=e.target.closest(".logo");if(l&&!l.contains(e.relatedTarget))l.style.transform=""});
+
+/* Settings: accent picker */
+APPS.settings.h=430;
+const _si=APPS.settings.init;
+APPS.settings.init=function(b){_si(b);const bd=$(".bd",b),row=document.createElement("div");row.className="sw";
+ row.innerHTML=`<span>Accent glow</span><div class="swatches">${Object.keys(ACCENTS).map(n=>`<button class="swt" data-a="${n}" aria-label="${n}" title="${n}" style="--c:${ACCENTS[n]}"></button>`).join("")}</div>`;
+ bd.insertBefore(row,bd.children[3]||null);
+ const mark=()=>$$(".swt",row).forEach(x=>x.classList.toggle("on",x.dataset.a===acc));
+ $$(".swt",row).forEach(x=>x.onclick=e=>{setAcc(x.dataset.a);mark();burst(e.clientX,e.clientY,12);toast("Accent: "+x.dataset.a)});mark()};
+
+/* Window snapping: drag a title bar to the top (maximize) or left/right edge (half screen) */
+const snapEl=document.createElement("div");snapEl.id="snap";document.body.append(snapEl);
+const zone=e=>small()?null:e.clientY<=6?"top":e.clientX<=6?"left":e.clientX>=innerWidth-7?"right":null;
+const rectFor=z=>{const w=(innerWidth-30)/2,h=innerHeight-128;return z==="top"?{l:10,t:38,w:innerWidth-20,h}:z==="left"?{l:10,t:38,w,h}:{l:20+w,t:38,w,h}};
+document.addEventListener("pointermove",e=>{const d=$(".win.drag"),z=d&&e.target.closest&&e.target.closest(".tb")?zone(e):null;
+ if(z){const r=rectFor(z);Object.assign(snapEl.style,{left:r.l+"px",top:r.t+"px",width:r.w+"px",height:r.h+"px"});snapEl.classList.add("on")}else snapEl.classList.remove("on")});
+document.addEventListener("pointerup",e=>{snapEl.classList.remove("on");const d=$(".win.drag");if(!d||!e.target.closest||!e.target.closest(".tb"))return;
+ const z=zone(e);if(!z)return;
+ setTimeout(()=>{if(z==="top")d.classList.add("max");else{const r=rectFor(z);d.classList.remove("max");Object.assign(d.style,{left:r.l+"px",top:r.t+"px",width:r.w+"px",height:r.h+"px"})}toast("Window snapped")},0)},true);
+
+/* Shortcuts: Alt+1..9 opens dock apps */
+addEventListener("keydown",e=>{if(e.altKey&&!e.ctrlKey&&!e.metaKey&&/^Digit[1-9]$/.test(e.code)){
+ const k=ORDER.filter(x=>x!=="|")[+e.code.slice(5)-1];if(k){e.preventDefault();openApp(k)}}});
+const g=$(".ghost");if(g)g.textContent="Right-click the desktop · Ctrl/Cmd+K to search · Alt+1-9 apps · drag a window to an edge to snap";
+
+/* Easter egg: type "havoc" */
+let buf="";
+const havoc=()=>{toast("HAVOC MODE");const names=Object.keys(ACCENTS).filter(n=>n!=="Mono");let i=0;
+ root.classList.add("havoc");burst(innerWidth/2,innerHeight/2,44);
+ const iv=setInterval(()=>{paint(ACCENTS[names[i++%names.length]]);if(i%4===0)burst(Math.random()*innerWidth,Math.random()*innerHeight*.7,16)},180);
+ setTimeout(()=>{clearInterval(iv);root.classList.remove("havoc");paint(ACCENTS[acc])},4200)};
+document.addEventListener("keydown",e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.metaKey||e.ctrlKey||e.altKey||e.key.length!==1)return;
+ buf=(buf+e.key.toLowerCase()).slice(-5);if(buf==="havoc"){buf="";havoc()}});
+})();
 </script>
 </body>
 </html>
