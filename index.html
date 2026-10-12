@@ -151,7 +151,7 @@ html.rm *{animation:none!important;transition:none!important}
 .mb::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--acc-rgb),.8),transparent);background-size:200% 100%;animation:tbflow 8s linear infinite}
 @keyframes tbflow{to{background-position:200% 0}}
 .dock{box-shadow:0 20px 50px -10px rgba(1,3,35,.8),inset 0 1px 0 rgba(255,255,255,.2),0 0 46px -14px rgba(var(--acc-rgb),.55)}
-.dock.mg .dk{transition:transform .09s linear}
+.dk{transform-origin:50% 100%;transition:none}.dk:hover,.dk:focus-visible{transform:none}
 .dk.bounce{animation:dkb .75s cubic-bezier(.3,.9,.4,1)}
 @keyframes dkb{30%{transform:translateY(-24px) scale(1.12)}55%{transform:none}75%{transform:translateY(-10px)}100%{transform:none}}
 .dk.open::after{background:var(--acc);box-shadow:0 0 8px var(--acc);opacity:1}
@@ -604,7 +604,7 @@ function drag(el){const tb=$(".tb",el);tb.onpointerdown=e=>{if(e.target.closest(
 
 /* Dock */
 $("#dock").innerHTML=ORDER.map(k=>{if(k==="|")return'<div class="sep"></div>';const a=APPS[k];return`<button class="dk" data-id="${k}" data-tip="${a.t.replace("About ","")}" aria-label="${a.t}" style="background:linear-gradient(145deg,${a.g})">${ic(a.i)}</button>`}).join("");
-document.querySelectorAll(".dk").forEach(b=>b.onclick=()=>{const w=wins[b.dataset.id];w&&!w.el.classList.contains("min")?closeApp(b.dataset.id):openApp(b.dataset.id)});
+document.querySelectorAll(".dk").forEach(b=>b.onclick=e=>{const w=wins[b.dataset.id];w&&!w.el.classList.contains("min")?closeApp(b.dataset.id):openApp(b.dataset.id);if(e.detail)b.blur()});
 function dockState(){document.querySelectorAll(".dk").forEach(b=>{const w=wins[b.dataset.id];b.classList.toggle("open",!!w&&!w.el.classList.contains("min"));b.classList.toggle("minz",!!w&&w.el.classList.contains("min"))})}
 
 /* Menus */
@@ -702,18 +702,20 @@ root.addEventListener("mouseleave",()=>{mx=my=-9999;has=false;cg.classList.remov
 /* Dock magnification + bounce on launch */
 const dock=$("#dock"),dks=$$(".dk",dock);
 const dzone=e=>{const r=dock.getBoundingClientRect();return e.clientX>r.left-30&&e.clientX<r.right+30&&e.clientY>r.top-90&&e.clientY<r.bottom+20};
-const dreset=()=>{dock.classList.remove("mg");base=[];dks.forEach(k=>k.style.transform="")};
-document.addEventListener("pointermove",e=>{if(small()||isRM()||e.pointerType==="touch")return;
- if(!dzone(e)){if(base.length)dreset();return}
- if(!base.length)base=dks.map(k=>k.offsetLeft+k.offsetWidth/2);
- const x=e.clientX,sc=base.map(b=>1+.42*Math.exp(-(((x-b)/64)**2)));let a=0;
- base.forEach((b,i)=>{if(Math.abs(x-b)<Math.abs(x-base[a]))a=i});
- const ex=sc.map(s=>(s-1)*52);dock.classList.add("mg");
- dks.forEach((k,i)=>{let tx=0;
-  if(i>a){tx=ex[a]/2+ex[i]/2;for(let j=a+1;j<i;j++)tx+=ex[j]}
-  else if(i<a){tx=-(ex[a]/2+ex[i]/2);for(let j=i+1;j<a;j++)tx-=ex[j]}
-  k.style.transform=`translate(${tx}px,${-(sc[i]-1)*64}px) scale(${sc[i]})`})});
-document.documentElement.addEventListener("mouseleave",dreset);addEventListener("resize",()=>{base=[]});
+let dpx=null,dcur=dks.map(()=>1),draf=0;
+const dstep=()=>{draf=0;const R=120,bs=dks.map(k=>k.offsetLeft+k.offsetWidth/2);
+ const tg=bs.map(b=>{if(dpx==null)return 1;const d=Math.abs(dpx-b);return d<R?1+.4*(Math.cos(Math.PI*d/R)+1)/2:1});
+ let moving=false;dcur=dcur.map((c,i)=>{const n=c+(tg[i]-c)*.22;if(Math.abs(n-tg[i])>.002){moving=true;return n}return tg[i]});
+ const ex=dcur.map(c=>(c-1)*52),tot=ex.reduce((a,b)=>a+b,0);let acc=0;
+ dks.forEach((k,i)=>{const sh=acc+ex[i]/2-tot/2;acc+=ex[i];
+  k.style.transform=(dpx!=null||moving)?`translate(${sh.toFixed(2)}px,${(-(dcur[i]-1)*20).toFixed(2)}px) scale(${dcur[i].toFixed(3)})`:""});
+ if(moving)draf=requestAnimationFrame(dstep)};
+const dkick=()=>{if(!draf)draf=requestAnimationFrame(dstep)};
+const dreset=()=>{dpx=null;dcur=dks.map(()=>1);dks.forEach(k=>k.style.transform="")};
+document.addEventListener("pointermove",e=>{
+ if(small()||isRM()||e.pointerType==="touch"){if(dcur.some(c=>c!==1))dreset();return}
+ dpx=dzone(e)?e.clientX:null;dkick()});
+document.documentElement.addEventListener("mouseleave",()=>{dpx=null;dkick()});addEventListener("resize",dreset);
 
 const _open=openApp;
 openApp=function(id){const a=APPS[id],fresh=!!a&&!wins[id]&&!(a.url&&CFG[a.url]);_open(id);
