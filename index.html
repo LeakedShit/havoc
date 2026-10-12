@@ -124,7 +124,7 @@ html.rm *{animation:none!important;transition:none!important}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* ===================== ENHANCEMENTS ===================== */
-:root{--acc:#8f7bff;--acc-rgb:143,123,255}
+:root{--acc:#ffffff;--acc-rgb:255,255,255}
 ::selection{background:rgba(var(--acc-rgb),.45);color:#fff}
 *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.28) transparent}
 
@@ -650,9 +650,9 @@ const isRM=()=>root.classList.contains("rm")||matchMedia("(prefers-reduced-motio
 const small=()=>innerWidth<=720;
 
 /* Accent colour (persisted) */
-const ACCENTS={Aurora:"#8f7bff",Cyan:"#38d6ff",Rose:"#ff6b9d",Lime:"#9dff6b",Amber:"#ffb454",Mono:"#e4e4e8"};
+const ACCENTS={White:"#ffffff",Aurora:"#8f7bff",Cyan:"#38d6ff",Rose:"#ff6b9d",Lime:"#9dff6b",Amber:"#ffb454",Mono:"#e4e4e8"};
 const paint=h=>{const n=parseInt(h.slice(1),16);root.style.setProperty("--acc",h);root.style.setProperty("--acc-rgb",[n>>16&255,n>>8&255,n&255].join(","))};
-let acc=store.get("acc");if(!ACCENTS[acc])acc="Aurora";
+let acc=store.get("acc");if(!ACCENTS[acc])acc="White";
 const setAcc=n=>{acc=n;paint(ACCENTS[n]);store.set("acc",n)};paint(ACCENTS[acc]);
 
 /* Boot splash */
@@ -761,13 +761,16 @@ const g=$(".ghost");if(g)g.textContent="Right-click the desktop · Ctrl/Cmd+K to
 
 /* Easter egg: type "havoc" */
 let buf="";
-const havoc=()=>{toast("HAVOC MODE");const names=Object.keys(ACCENTS).filter(n=>n!=="Mono");let i=0;
+const havoc=()=>{toast("HAVOC MODE");const names=Object.keys(ACCENTS).filter(n=>n!=="Mono"&&n!=="White");let i=0;
  root.classList.add("havoc");burst(innerWidth/2,innerHeight/2,44);
  const iv=setInterval(()=>{paint(ACCENTS[names[i++%names.length]]);if(i%4===0)burst(Math.random()*innerWidth,Math.random()*innerHeight*.7,16)},180);
  setTimeout(()=>{clearInterval(iv);root.classList.remove("havoc");paint(ACCENTS[acc])},4200)};
 document.addEventListener("keydown",e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.metaKey||e.ctrlKey||e.altKey||e.key.length!==1)return;
  buf=(buf+e.key.toLowerCase()).slice(-5);if(buf==="havoc"){buf="";havoc()}});
 })();
+
+/* double-click a section in the Privacy Policy / Terms sidebar = close that window */
+document.addEventListener("dblclick",e=>{const b=e.target.closest&&e.target.closest(".side button[data-j]");if(!b)return;const w=b.closest(".win"),id=Object.keys(wins).find(k=>wins[k].el===w);if(id){const g=getSelection();g&&g.removeAllRanges();closeApp(id)}});
 </script>
 </body>
 </html>
