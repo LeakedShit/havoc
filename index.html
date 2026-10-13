@@ -264,7 +264,7 @@ body.locked>*:not(#lock):not(#boot){visibility:hidden}
 <symbol id="life" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M5.6 5.6l3.9 3.9M14.5 14.5l3.9 3.9M18.4 5.6l-3.9 3.9M9.5 14.5l-3.9 3.9"/></symbol>
 <symbol id="book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h13v17H6a2 2 0 00-2 2zM4 19a2 2 0 012-2h13"/></symbol>
 <symbol id="file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8zM14 3v5h5M9 13h6M9 17h6"/></symbol>
-<symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></symbol>
+<symbol id="lockic" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></symbol>
 <symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></symbol>
 <symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
 <symbol id="wifi" viewBox="0 0 24 24"><path d="M2 9a15 15 0 0120 0M5.5 12.5a10 10 0 0113 0M9 16a5 5 0 016 0M12 19.5h.01"/></symbol>
@@ -445,7 +445,7 @@ R.querySelectorAll('[data-g]').forEach(x=>x.onclick=()=>opn(x.dataset.g));
 $('#lo',R).onclick=async()=>{try{await api('/api/logout',{method:'POST'})}catch(e){}login()}};
 servers()}},
 tos:{t:"Terms of Service",i:"file",g:"#a3a8ff,#4B27FF",w:620,h:480,dock:1,body:()=>legal("Terms of Service",TOS),init:legalInit},
-privacy:{t:"Privacy Policy",i:"lock",g:"#4f7bff,#102BA8",w:620,h:480,dock:1,body:()=>legal("Privacy Policy",PRIV),init:legalInit},
+privacy:{t:"Privacy Policy",i:"lockic",g:"#4f7bff,#102BA8",w:620,h:480,dock:1,body:()=>legal("Privacy Policy",PRIV),init:legalInit},
 settings:{t:"Settings",i:"gear",g:"#8a93c9,#3c4482",w:440,h:380,dock:1,body:()=>`<div class="bd"><h1>Settings</h1><div class="sw"><span>Reduce motion</span><button class="tg" role="switch" aria-label="Reduce motion" id="rm" aria-checked="${store.get("rm")==="1"}"></button></div><div class="sw"><span>Wallpaper tone</span><div class="pills" style="margin:0" id="wp">${["graphite","silver","ink"].map(w=>`<button data-w="${w}">${w}</button>`).join("")}</div></div><div class="sw"><span>Window positions</span><button class="btn" id="rst">Reset</button></div></div>`,init(b){const rm=$("#rm",b);rm.onclick=()=>{const v=rm.getAttribute("aria-checked")!=="true";rm.setAttribute("aria-checked",v);setRM(v)};const sw=()=>b.querySelectorAll("[data-w]").forEach(x=>x.classList.toggle("on",x.dataset.w===document.documentElement.dataset.wp));b.querySelectorAll("[data-w]").forEach(x=>x.onclick=()=>{setWP(x.dataset.w);sw()});sw();$("#rst",b).onclick=resetWins}},
 site:{t:"About This Website",i:"bot",g:"#7865FF,#174DFF",w:400,h:300,dock:0,body:()=>`<div class="bd" style="text-align:center"><div class="logo" style="margin:6px auto 14px">${ic("bot")}</div><h1>${N}</h1><p class="mut">An interactive desktop-style site. Open apps from the dock, drag windows by the title bar, right-click the desktop, or press Ctrl/Cmd+K.</p></div>`}
 };
@@ -453,51 +453,53 @@ const ORDER=["about","features","commands","|","invite","support","dash","|","to
 
 const RAW=`
 #Moderation
-/mod ban <user> [reason] :: Ban a member :: Ban Members
-/mod unban <user_id> [reason] :: Unban a user by ID :: Ban Members
-/mod kick <member> [reason] :: Kick a member :: Kick Members
-/mod softban <member> [reason] :: Ban then unban to wipe recent messages :: Ban Members
-/mod tempban <user> <duration> [reason] :: Ban for a set time :: Ban Members
-/mod massban <ids> :: Ban up to 50 users at once :: Ban Members
-/mod timeout <member> <duration> [reason] :: Timeout a member (max 28d) :: Moderate Members
-/mod untimeout <member> :: Remove a timeout :: Moderate Members
-/mod mute <member> [duration] [reason] :: Mute with the muted role :: Moderate Members
-/mod unmute <member> :: Unmute and restore roles :: Moderate Members
-/mod jail <member> [reason] :: Strip roles and restrict a member :: Manage Roles, Moderate Members
-/mod unjail <member> :: Release a member and restore roles :: Manage Roles, Moderate Members
-/mod strip <member> :: Remove roles with dangerous permissions :: Manage Roles
-/mod nick <member> [name] :: Change or reset a nickname :: Manage Nicknames
+/ban <user> [reason] :: Ban a member :: Ban Members
+/unban <user_id> [reason] :: Unban a user by ID :: Ban Members
+/kick <member> [reason] :: Kick a member :: Kick Members
+/softban <member> [reason] :: Ban then unban to wipe recent messages :: Ban Members
+/tempban <user> <duration> [reason] :: Ban for a set time :: Ban Members
+~massban <ids> :: Ban up to 50 users at once :: Ban Members
+/timeout <member> <duration> [reason] :: Timeout a member (max 28d) :: Moderate Members
+/untimeout <member> :: Remove a timeout :: Moderate Members
+~timeouts :: List members who are timed out :: Moderate Members
+/mute <member> [duration] [reason] :: Mute with the muted role :: Moderate Members
+/unmute <member> :: Unmute and restore roles :: Moderate Members
+/muterole [role] :: Choose the muted role, or create one :: Manage Roles
+/jail <member> [reason] :: Strip roles and restrict a member :: Manage Roles, Moderate Members
+/unjail <member> :: Release a member and restore roles :: Manage Roles, Moderate Members
+~jailed :: List jailed members :: Moderate Members
+~strip <member> :: Remove roles with dangerous permissions :: Manage Roles
+/nick <member> [name] :: Change or reset a nickname :: Manage Nicknames
 ~decancer <member> :: Normalize an unreadable nickname :: Manage Nicknames
-~timeouts :: List timed out members :: Moderate Members
+/report <member> <reason> :: Report a member to staff
+~bans :: Show the most recent bans :: Ban Members
 #Cases and Warnings
-/cases warn <member> [reason] :: Warn a member (auto-punishments apply) :: Moderate Members
-/cases warnings <member> :: Show a member's warnings :: Moderate Members
-/cases clearwarns <member> :: Clear all warnings :: Moderate Members
-/cases warnlist <user> :: Warnings with case ID, mod and time :: Moderate Members
-/cases purgewarn <case_id> :: Remove one warning :: Moderate Members
-/cases pwarnings [warns] [action] [duration] :: Auto-punish at a warn count :: Manage Server
-/cases warnexpiry <days> :: Warnings expire after N days (0 = never) :: Manage Server
-/cases note <member> <text> :: Add a private staff note :: Moderate Members
-/cases notes <user> :: Show staff notes :: Moderate Members
-/cases history <user> :: Full moderation history :: Moderate Members
-/cases case <number> :: Look up a case :: Moderate Members
-/cases reason <number> <text> :: Edit a case reason :: Moderate Members
-/cases bans :: Show the most recent bans :: Ban Members
-/cases jailed :: List jailed members :: Moderate Members
+/warn <member> [reason] :: Warn a member (auto-punishments apply) :: Moderate Members
+/warnings <member> :: Show a member's warnings :: Moderate Members
+/clearwarns <member> :: Clear all warnings :: Moderate Members
+~warnlist <user> :: Warnings with case ID, mod and time :: Moderate Members
+~purgewarn <case_id> :: Remove one warning :: Moderate Members
+/pwarnings [warns] [action] [duration] :: Auto-punish at a warn count :: Manage Server
+~warnexpiry <days> :: Warnings expire after N days (0 = never) :: Manage Server
+/note <member> <text> :: Add a private staff note :: Moderate Members
+/notes <user> :: Show staff notes :: Moderate Members
+/history <user> :: Full moderation history :: Moderate Members
+/case <number> :: Look up a case :: Moderate Members
+~reason <number> <text> :: Edit a case reason :: Moderate Members
 ~delcase <number> :: Delete a case :: Moderate Members
 ~modstats [moderator] :: Moderation action counts :: Moderate Members
 #Channels and Chat
 /purge <amount> [filter] [user] :: Bulk delete messages (1-500 or all) :: Manage Messages
 /slowmode <seconds> :: Set channel slowmode (0 = off) :: Manage Channels
-/chat lock :: Lock the channel for @everyone and the main role :: Manage Channels
-/chat unlock :: Unlock the channel :: Manage Channels
-/chat unhide :: Make the channel visible again :: Manage Channels
-/chat lockdown <enabled> :: Lock or unlock every text channel :: Administrator
-/chat nuke :: Clone and delete the channel to wipe it :: Manage Channels
+/lock :: Lock the channel for @everyone and the main role :: Manage Channels
+/unlock :: Unlock the channel :: Manage Channels
 ~hide :: Hide the channel from @everyone :: Manage Channels
-/say <text> :: Send a message as the bot :: Manage Messages
-/stick [text] :: Stick a message to the bottom of the channel :: Manage Messages
-/unstick :: Remove the sticky message :: Manage Messages
+~unhide :: Make the channel visible again :: Manage Channels
+/lockdown <enabled> :: Lock or unlock every text channel :: Administrator
+/nuke :: Clone and delete the channel to wipe it :: Manage Channels
+~say <text> :: Send a message as the bot :: Manage Messages
+~stick [text] :: Stick a message to the bottom of the channel :: Manage Messages
+~unstick :: Remove the sticky message :: Manage Messages
 ~stickies :: List sticky messages :: Manage Messages
 ~snipe :: Show the last deleted message :: Manage Messages
 ~editsnipe :: Show the last edited message :: Manage Messages
@@ -536,25 +538,27 @@ const RAW=`
 ~moderator [role] :: Add or remove a moderator role :: Manage Server
 ~stafflist :: Show admin, moderator and staff roles
 #Protection
-/protect automod <filter> <enabled> :: Toggle an AutoMod filter :: Manage Server
-/protect automodaction <filter> <action> :: Set what AutoMod does :: Manage Server
-/protect automodignore <channel> :: Channels and roles AutoMod skips :: Manage Server
-/protect antinuke <enabled> :: Toggle anti-nuke :: Administrator
-/protect antinukeconfig [limit] [window] [action] :: Tune anti-nuke :: Administrator
-/protect raidmode <enabled> :: Toggle raid mode :: Manage Server
-/protect raidconfig [joins] [window] [action] :: Tune anti-raid :: Manage Server
-/protect whitelist [user] [remove] :: Exempt a user from AutoMod and anti-nuke :: Administrator
+/automod <filter> <enabled> :: Toggle an AutoMod filter :: Manage Server
+/automodaction <filter> <action> :: Set what AutoMod does besides deleting :: Manage Server
+/automodignore channel <channel> :: Toggle a channel AutoMod skips :: Manage Server
+/automodignore role <role> :: Toggle a role AutoMod skips :: Manage Server
+/automodignore list :: Show what AutoMod ignores :: Manage Server
 /filter add <word> :: Block a word :: Manage Server
 /filter remove <word> :: Unblock a word :: Manage Server
 /filter list :: Show blocked words :: Manage Server
+/antinuke <enabled> :: Toggle anti-nuke :: Administrator
+/antinukeconfig [limit] [window] [action] :: Tune anti-nuke :: Administrator
+/raidmode <enabled> :: Toggle raid mode :: Manage Server
+/raidconfig [joins] [window] [action] :: Tune anti-raid :: Manage Server
+/whitelist [user] [remove] :: Exempt a user from AutoMod and anti-nuke :: Administrator
 /honeypot setup [channel] :: Create the honeypot trap channel :: Manage Server, Manage Channels
 /honeypot config :: Open honeypot settings :: Manage Server
 /honeypot off :: Turn the honeypot off :: Manage Server
 /honeypot status :: Show honeypot settings and triggers :: Manage Server
-/bannedserver add <server_id> [reason] :: Ban a whole Discord server :: Ban Members
-/bannedserver remove <server_id> :: Unban a Discord server :: Ban Members
-/bannedserver list :: List banned servers :: Ban Members
-/bannedserver action <action> :: Kick or ban members of banned servers :: Manage Server
+/banserver <server_id> [reason] :: Ban a whole Discord server :: Ban Members
+/unbanserver <server_id> :: Unban a Discord server :: Ban Members
+/bannedservers :: List banned servers :: Ban Members
+/bannedserveraction [action] :: Ban, kick or block members of banned servers :: Manage Server
 #Verification
 /verify setup <role> [mode] [channel] :: Post a verify panel :: Manage Server
 /verify off :: Turn verification off :: Manage Server
@@ -577,9 +581,8 @@ const RAW=`
 /verify altscan :: Sweep the server for linked accounts :: Manage Server
 /verify altstatus :: What the alt detector knows :: Manage Server
 /verify forget <user> :: Delete stored alt data for a user :: Manage Server
-/verify linkdata <mode> :: Link evidence on or off :: Manage Server
 #Tickets
-/ticket setup [category] [channel] :: Post the ticket panel :: Manage Server
+/ticket setup [category] [channel] [transcript_channel] :: Post the ticket panel :: Manage Server
 /ticket addrole <role> :: Add a support role :: Manage Server
 /ticket removerole <role> :: Remove a support role :: Manage Server
 /ticket addviewer <role> :: Add a role that sees every ticket :: Manage Server
@@ -600,21 +603,20 @@ const RAW=`
 /ticketblacklist remove <role> :: Let a role open tickets again :: Manage Server
 /ticketblacklist list :: Show blacklisted roles :: Manage Server
 #Giveaways
-/giveaway create [channel] :: Create a giveaway with a form :: Manage Server
-/giveaway start <duration> <winners> <prize> :: Start a giveaway here :: Manage Server
-/giveaway end [message_id] :: End a giveaway and pick winners :: Manage Server
-/giveaway reroll [message_id] [count] :: Pick new winners :: Manage Server
-/giveaway list :: List running giveaways :: Manage Server
+/gcreate [channel] :: Create a giveaway with a form :: Manage Server
+/gstart <duration> <winners> <prize> :: Start a giveaway here :: Manage Server
+/gend [message_id] :: End a giveaway and pick winners :: Manage Server
+/greroll [message_id] [count] :: Pick new winners :: Manage Server
+~glist :: List running giveaways :: Manage Server
 ~gdelete <message_id> :: Delete a giveaway without winners :: Manage Server
 ~ghelp :: How giveaways work
 #Server Setup
-/setup config [log_channel] :: Set the log channel or view settings :: Manage Server
-/setup logs :: Interactive logging panel :: Manage Server
-/setup dmnotify <enabled> :: DM members when they are actioned :: Manage Server
-/setup tracking <enabled> :: Message counting on or off :: Administrator
-/setup mainrole [role] :: Role that lock also handles :: Manage Server
-/setup muterole [role] :: Choose or create the muted role :: Manage Roles
+/config [log_channel] :: Set the log channel or view settings :: Manage Server
+/logs :: Interactive logging panel :: Manage Server
+~dmnotify <enabled> :: DM members when they are actioned :: Manage Server
+~msgtracking <enabled> :: Message counting on or off :: Administrator
 ~msgbackfill [channel] [limit] :: Import older messages for stats :: Manage Server
+/mainrole [role] :: Role that lock also handles :: Manage Server
 /prefix list :: Show the current prefix
 /prefix change <new_prefix> :: Set a new prefix :: Manage Server
 /prefix off :: Turn the text prefix off :: Manage Server
@@ -628,6 +630,8 @@ const RAW=`
 /voicemeter setup :: Create join-to-create voice rooms :: Manage Channels
 /voicemeter panel :: Re-send the voice control panel :: Manage Channels
 /voicemeter remove :: Turn voicemeter off :: Manage Channels
+/backup :: Save every role, category, channel and permission :: Administrator
+/restore [member_roles] :: Put the server back like your last backup :: Administrator
 #Voice
 /voice kick <member> :: Disconnect a member from voice :: Move Members
 /voice move <member> <channel> :: Move a member to another channel :: Move Members
@@ -638,19 +642,24 @@ const RAW=`
 #Info and Utility
 /help [command] :: Every command and how to use it
 ~cmds :: Every slash command at a glance
-/info user [member] :: Member info, avatar, banner and roles
-/info server :: Server info
-/info role <role> :: Role info
-/info bot :: Bot stats
-/info avatar [user] :: Show someone's avatar
-/info invites :: Show active invites :: Manage Server
-/info messages [user] [options] :: Message analytics per user or channel
-/info ping :: Bot latency
+/server :: Info about this server
+/serverinfo <server_id> :: Look up any server by its ID :: Manage Server (other servers)
+~userinfo [member] :: Member info, avatar, banner and roles
+~roleinfo <role> :: Role info
+~botinfo :: Bot stats
+~avatar [user] :: Show someone's avatar
+~invites :: Show active invites :: Manage Server
+/messages [user] [options] :: Message analytics per user or channel
+~perms [member] :: List the permissions a member has
+~roles :: List every role in the server
+~firstmessage :: Jump to the first message in the channel
+/changelog :: See what changed in each Havoc release
+/bug [screenshot] <report> :: Report a bug to the Havoc team
+~ping :: Bot latency
 ~uptime :: How long the bot has been online
-/tools afk [reason] :: Mark yourself AFK
-/tools remind <duration> <text> :: Get a reminder later
-/tools poll <question> :: Start a yes/no poll
-/tools report <member> <reason> :: Report a member to staff
+~afk [reason] :: Mark yourself AFK
+~remind <duration> <text> :: Get a reminder later
+~poll <question> :: Start a yes/no poll
 `;
 function parseCmds(){let cat="General";const out=[];RAW.split("\n").forEach(l=>{l=l.trim();if(!l)return;if(l[0]==="#"){cat=l.slice(1).trim();return}const p=l.split("::").map(s=>s.trim());let u=p[0];const po=u[0]==="~";if(po)u="<prefix>"+u.slice(1);const t=u.split(" ");const i=t.findIndex((x,j)=>j>0&&/^[<\[]/.test(x));out.push([(i<0?t:t.slice(0,i)).join(" "),cat,(p[1]||"")+(po?" (prefix only)":""),u,p[2]||"None"])});return out}
 COMMANDS=parseCmds();let LIVE=true;fetch(CFG.commandsUrl,{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(d=>{if(Array.isArray(d)&&d.length){COMMANDS=d.map(c=>Array.isArray(c)?c:[c.name,c.category||"General",c.description||"",c.usage||c.name,c.permissions||"None"]);LIVE=true}}).catch(()=>{});
